@@ -1,4 +1,5 @@
-module OptionParser (Option (..)) where
+module OptionParser (Option (..)
+                   , shortName) where
 
 import Control.Monad (void)
 
@@ -6,7 +7,7 @@ import Text.Megaparsec
 import Text.Megaparsec.Expr
 import Text.Megaparsec.String
 
-data Option = ShortName Char deriving (Show)
+data Option = ShortName Char deriving (Show, Eq)
 
 dash = char '-'
 ignoreMany = void . many . char
