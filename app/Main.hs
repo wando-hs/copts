@@ -28,65 +28,65 @@ helpText =  "Naval Fate.\
 main :: IO ()
 main = someFunc
 
--- data Option = LongName String
---             | ShortName Char
---             | LongNameWithParam String String
---             | Description String
---             | Default String
---             deriving (Show)
---
--- dash = char '-'
--- greaterThan = char '>'
--- lessThan = char '<'
---
--- ignoreMany = void . many . char
--- ignore = void . try . char
--- dashes n = void $ count n dash
---
--- spaces :: Int -> Parser ()
--- spaces n = void $ count n $ char ' '
---
--- defStart = string "[default:"
---
--- param = ignore '='
---     >> angles <|> some upperChar
---     <?> "a non empty parameter name"
---         where angles = between lessThan greaterThan (some $ noneOf "<>")
---
--- defaultValue = Default
---     <$> between defStart (char ']') (some $ noneOf "]")
---
--- shortName = ShortName
---     <$ ignoreMany ' '
---     <* dashes 1
---     <*> letterChar
---
--- longName' = withParam
---     <$ ignoreMany ' '
---     <* dashes 2
---     <*> some (alphaNumChar <|> dash)
---     <*> lookAhead anyChar
---     where withParam name c = if (c == '=')
---                                 then LongNameWithParam name <$> param
---                                 else return $ LongName name
---
--- longName = longName' >>= id
---
--- description = Description
---     <$ spaces 2
---     <* ignoreMany ' '
---     <*> manyTill anyChar stop
---         where stop = lookAhead (defStart <|> eol)
---
--- z (LongNameWithParam _ _) = True
--- z _ = False
---
--- zuera :: Parser [Option]
--- zuera = do
---     options <- some $ try shortName <|> try longName
---     desc <- description
---     if any z options
---        then do
---            def <- many $ try defaultValue
---            return $ desc : (def ++ options)
---        else return $ desc : options
+data Option = LongName String
+            | ShortName Char
+            | LongNameWithParam String String
+            | Description String
+            | Default String
+            deriving (Show)
+
+dash = char '-'
+greaterThan = char '>'
+lessThan = char '<'
+
+ignoreMany = void . many . char
+ignore = void . try . char
+dashes n = void $ count n dash
+
+spaces :: Int -> Parser ()
+spaces n = void $ count n $ char ' '
+
+defStart = string "[default:"
+
+param = ignore '='
+    >> angles <|> some upperChar
+    <?> "a non empty parameter name"
+        where angles = between lessThan greaterThan (some $ noneOf "<>")
+
+defaultValue = Default
+    <$> between defStart (char ']') (some $ noneOf "]")
+
+shortName = ShortName
+    <$ ignoreMany ' '
+    <* dashes 1
+    <*> letterChar
+
+longName' = withParam
+    <$ ignoreMany ' '
+    <* dashes 2
+    <*> some (alphaNumChar <|> dash)
+    <*> lookAhead anyChar
+    where withParam name c = if (c == '=')
+                                then LongNameWithParam name <$> param
+                                else return $ LongName name
+
+longName = longName' >>= id
+
+description = Description
+    <$ spaces 2
+    <* ignoreMany ' '
+    <*> manyTill anyChar stop
+        where stop = lookAhead (defStart <|> eol)
+
+z (LongNameWithParam _ _) = True
+z _ = False
+
+zuera :: Parser [Option]
+zuera = do
+    options <- some $ try shortName <|> try longName
+    desc <- description
+    if any z options
+       then do
+           def <- many $ try defaultValue
+           return $ desc : (def ++ options)
+       else return $ desc : options
