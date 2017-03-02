@@ -1,0 +1,36 @@
+name: copts
+version: '0.0.1'
+category: Console
+author: Fernando Oliveira
+copyright: 2017 Wando-HS
+license: MIT
+github: wando-hs/copts
+extra-source-files:
+- README.md
+dependencies:
+- base >=4.7 && <5
+- megaparsec
+library:
+  source-dirs: src
+executables:
+  copts:
+    main: Main.hs
+    source-dirs: app
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - copts
+tests:
+  copts-test:
+    main: Spec.hs
+    source-dirs: test
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - copts
+    - hspec
+    - hspec-megaparsec
