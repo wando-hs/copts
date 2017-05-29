@@ -20,4 +20,11 @@ spec =
       parse shortName "" "-a    " `shouldBe` (Right $ ShortName 'a')
     it "... an invalid option propagate error" $ do
       parse shortName "" `shouldFailOn` "- a"
+    it "... an invalid option propagate error" $ do
+      parse shortName "" `shouldFailOn` "-1"
+    it "... an invalid option propagate error" $ do
+      parse shortName "" `shouldFailOn` "a"
+    it "... an invalid option propagate error" $ do
+      parse shortName "" `shouldFailOn` "-"
+
 
