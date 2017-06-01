@@ -6,8 +6,9 @@ copyright: 2017 Wando-HS
 license: MIT
 github: wando-hs/copts
 dependencies:
-- base >=4.7 && <5
-- megaparsec
+  - base >=4.7 && <5
+  - containers
+  - megaparsec
 library:
   source-dirs: src
 executables:
@@ -15,11 +16,11 @@ executables:
     main: Main.hs
     source-dirs: app
     ghc-options:
-    - -threaded
-    - -rtsopts
-    - -with-rtsopts=-N
+      - -threaded
+      - -rtsopts
+      - -with-rtsopts=-N
     dependencies:
-    - copts
+      - copts
 tests:
   copts-test:
     main: Spec.hs

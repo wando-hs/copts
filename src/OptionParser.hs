@@ -1,9 +1,12 @@
 module OptionParser (Option (..)
                    , Flag (..)
                    , Parameter (..)
-                   , OptionParser.option
-                   , shortName) where
+                   , OptionParser.option) where
 
+import qualified Text.Megaparsec.String (Parser)
+import Data.Set (fromList, elemAt, size)
+import Data.Maybe (isJust)
+import Control.Applicative
 import Text.Megaparsec
 
 import Combinators
@@ -25,31 +28,43 @@ data Option = Option [Flag] (Maybe Parameter) Description
 description = spaces 2
     *> space
     *> manyTill anyChar stop
-      where stop = lookAhead (string "[default:" <|> eol)
+        where stop = lookAhead (string "[default:" <|> eol)
 
 defaultValue = space
     *> delimitedBy "[default: " "]"
 
-name = try (ignore ' ' *> some upperChar)
-    <|> (ignore '=' *> delimitedBy "<" ">")
-
 parameter Nothing = pure Nothing
 parameter (Just name) = Just
     <$> Parameter name
-    <$> try' defaultValue
+    <$> optional (try defaultValue)
 
-shortName = ShortName <$ space
-    <* dashes 1
-    <*> letterChar
+name prefix = optional
+    $ ignoreOneOf prefix
+    *> try (some upperChar <|> delimitedBy "<" ">")
 
-longName = LongName
-    <$ space
-    <* dashes 2
-    <*> some (alphaNumChar <|> dash)
+shortFlag = liftA2 (,) flag (name " ")
+    where flag = ShortName
+            <$ separator ','
+            <* dash
+            <*> letterChar
+
+longFlag = liftA2 (,) flag (name "= ")
+    where flag = LongName
+            <$ separator ','
+            <* dashes 2
+            <*> some (alphaNumChar <|> dash)
+
+validateNames names = if size set == 1
+          then Right $ elemAt 0 set
+          else Left "Ta de brincation"
+    where set = fromList $ filter isJust names
+
+flags = do
+    (fs, ns) <- internalize <*> some (try shortFlag <|> try longFlag)
+    either fail (\n -> pure (fs, n)) (validateNames ns)
 
 option = do
-    flags <- some $ try shortName <|> try longName
-    pName <- try' name
+    (fs, name) <- flags
     desc <- description
-    p <- parameter pName
-    pure $ Option flags p desc
+    p <- parameter name
+    pure $ Option fs p desc
