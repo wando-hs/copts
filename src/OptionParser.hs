@@ -39,8 +39,9 @@ parameter (Just name) = Just
     <$> optional (try defaultValue)
 
 name prefix = optional
+    $ try
     $ ignoreOneOf prefix
-    *> try (some upperChar <|> delimitedBy "<" ">")
+    *> (some upperChar <|> delimitedBy "<" ">")
 
 shortFlag = liftA2 (,) flag (name " ")
     where flag = ShortName
@@ -54,9 +55,10 @@ longFlag = liftA2 (,) flag (name "= ")
             <* dashes 2
             <*> some (alphaNumChar <|> dash)
 
-validateNames names = if size set == 1
-          then Right $ elemAt 0 set
-          else Left "Ta de brincation"
+validateNames names
+    | size set == 1 = Right $ elemAt 0 set
+    | null set      = Right Nothing
+    | otherwise     = Left "Ta de brincation"
     where set = fromList $ filter isJust names
 
 flags = do
