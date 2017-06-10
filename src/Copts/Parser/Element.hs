@@ -1,11 +1,6 @@
-module Copts.Parser.Element (Element (..)
-              , Flag (..)
-              , argument
-              , command
-              , option
-              , option'
-              , element
-              ) where
+module Copts.Parser.Element
+    (Element (..), Flag (..), argument, command, option, option', element)
+    where
 
 import Text.Megaparsec hiding (option)
 import Control.Applicative

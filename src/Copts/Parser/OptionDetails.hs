@@ -2,10 +2,12 @@ module Copts.Parser.OptionDetails
     (OptionDetail (..), Parameter (..), description, options, details)
     where
 
-import Text.Megaparsec (try, eol, char, string, lookAhead, anyChar, manyTill)
+import Text.Megaparsec.String (Parser)
+import Text.Megaparsec (try, eol, char, eof, string, lookAhead, anyChar, someTill)
 import Data.Set (fromList, elemAt, size)
 import Data.Maybe (isJust)
 import Control.Applicative
+import Control.Monad (void)
 
 import Copts.Applicative ((<:>))
 import Copts.Parser.Combinators
@@ -23,8 +25,8 @@ data OptionDetail = Details [Flag] (Maybe Parameter) Description
     deriving (Show, Eq)
 
 
-description = manyTill anyChar stop
-        where stop = lookAhead (string "[default:" <|> eol)
+description = someTill anyChar (try end <|> parameter)
+    where parameter = void . lookAhead . string $ "[default:"
 
 defaultValue = delimitedBy "[default: " "]"
 

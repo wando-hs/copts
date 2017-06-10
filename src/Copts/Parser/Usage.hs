@@ -24,9 +24,8 @@ elements = Elements <$> (some . try $ spaces *> element)
 arguments = Elements <$> (some . try $ spaces *> argument)
 
 
-xor = Groups XOR . concat <$> components <:> (some $ separator *> components)
-    where separator = spaces <* char '|' *> spaces
-          components = any [elements, required, optional]
+xor = Groups XOR . concat <$> components <:> (some $ separator '|' *> components)
+    where components = any [elements, required, optional]
 
 ellipsis = Groups Ellipsis <$> components <* string "..."
     where components = any [arguments, optional, required]

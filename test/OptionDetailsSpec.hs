@@ -2,7 +2,9 @@ module OptionDetailsSpec where
 
 import Test.Hspec
 import Test.Hspec.Megaparsec
-import Text.Megaparsec (Dec (..), parse, errorCustom)
+
+import Text.Megaparsec.String (Parser)
+import qualified Text.Megaparsec as M (Dec (..), parse, errorCustom)
 
 import Data.Set (fromList)
 import Data.Bifunctor (first)
@@ -11,30 +13,24 @@ import Copts.Parser.Element
 import Copts.Parser.OptionDetails
 
 
-equals a b = parse details "" a `shouldParse` b
+parse :: (Show a, Eq a) => (Parser a, String) -> a -> Expectation
+parse (parser, text) result = M.parse parser "" text `shouldParse` result
 
 failWith = (. err) . shouldBe . fail
-    where err  = Left . fromList . fmap DecFail
-          fail = first errorCustom . parse details ""
+    where err  = Left . fromList . fmap M.DecFail
+          fail = first M.errorCustom . M.parse details ""
 
 
-spec =
-  describe "parsing" $ do
-    it "valid options" $ do
-      equals "-h --help     Show this screen.\n"
-           $ Details [Short 'h', Long "help"] Nothing "Show this screen."
-      equals "--coefficient=K  The K coefficient [default: 2.95]\n"
-           $ Details [Long "coefficient"] (Just $ Parameter "K" $ Just "2.95") "The K coefficient "
-      equals "--output=FILE  Output file [default: test.txt]\n"
-           $ Details [Long "output"] (Just $ Parameter "FILE" $ Just "test.txt") "Output file "
-      equals "--directory=DIR  Some directory [default: ./]\n"
-           $ Details [Long "directory"] (Just $ Parameter "DIR" $ Just "./") "Some directory "
-      equals "-o FILE --output=FILE  Description\n"
-           $ Details [Short 'o', Long "output"] (Just $ Parameter "FILE" Nothing) "Description"
-      equals "-i <file>, --input <file>  Description\n"
-           $ Details [Short 'i', Long "input"] (Just $ Parameter "file" Nothing) "Description"
-      equals "--stdout  Use stdout.\n"
-           $ Details [Long "stdout"] Nothing "Use stdout."
+spec = let text #> result = parse (details, text) result in
+  describe "parsing option details" $ do
+    it "when it is valid" $ do
+      "-h --help     Show this screen."                    #> Details [Short 'h', Long "help"] Nothing "Show this screen."
+      "--coefficient=K  The K coefficient [default: 2.95]" #> Details [Long "coefficient"] (Just $ Parameter "K" $ Just "2.95") "The K coefficient "
+      "--output=FILE  Output file [default: test.txt]"     #> Details [Long "output"] (Just $ Parameter "FILE" $ Just "test.txt") "Output file "
+      "--directory=DIR  Some directory [default: ./]"      #> Details [Long "directory"] (Just $ Parameter "DIR" $ Just "./") "Some directory "
+      "-o FILE --output=FILE  Description"                 #> Details [Short 'o', Long "output"] (Just $ Parameter "FILE" Nothing) "Description"
+      "-i <file>, --input <file>  Description"             #> Details [Short 'i', Long "input"] (Just $ Parameter "file" Nothing) "Description"
+      "--stdout  Use stdout."                              #> Details [Long "stdout"] Nothing "Use stdout."
 
     it "invalid options" $ do
       failWith "-a A --bb B  Teste" ["Ta de brincation"]
