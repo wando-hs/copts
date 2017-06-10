@@ -9,7 +9,7 @@ module Copts.Parser.Element (Element (..)
 
 import Text.Megaparsec hiding (option)
 import Control.Applicative
-import Combinators
+import Copts.Parser.Combinators
 
 
 data Flag = Long String | Short Char
