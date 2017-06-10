@@ -5,6 +5,7 @@ import Prelude (Show, Eq, ($), (.), (++), concat, foldr1, map, init, last)
 import Control.Applicative ((<*>), (*>), (<*), (<|>), liftA2, pure)
 import Data.Functor ((<$>), (<$))
 
+import Copts.Applicative ((<:>))
 import Copts.Parser.Combinators
 import Copts.Parser.Element
 

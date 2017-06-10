@@ -5,7 +5,6 @@ module Copts.Parser.Combinators (dash
   , ignoreOneOf
   , separator
   , internalize
-  , (<:>)
   , tryAll
   , delimitedBy) where
 
@@ -39,9 +38,6 @@ separator c = space <* optional (ignore c) <* space
 
 internalize :: Functor f => Parser (f (a, b) -> (f a, f b))
 internalize = pure $ liftA2 (,) (fmap fst) (fmap snd)
-
-(<:>) :: Applicative f => f a -> f [a] -> f [a]
-head <:> tail = liftA2 (:) head tail
 
 tryAll :: [Parser a] -> Parser a
 tryAll l = foldr1 (<|>) (map try (init l) ++ [last l])

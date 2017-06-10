@@ -9,6 +9,7 @@ module Copts.Parser.Element (Element (..)
 
 import Text.Megaparsec hiding (option)
 import Control.Applicative
+import Copts.Applicative ((<:>))
 import Copts.Parser.Combinators
 
 
