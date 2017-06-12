@@ -1,4 +1,4 @@
-module Copts.Parser.Usage (Usage (..), Type (..), usage) where
+module Copts.Parser.Usage (Usage (..), usage, xor) where
 
 import Text.Megaparsec (char, between, try, some, many, string, eol, newline)
 import Prelude (Show, Eq, ($), (.), (++), concat, foldr1, map, init, last)
@@ -9,31 +9,34 @@ import Copts.Applicative ((<:>))
 import Copts.Parser.Combinators
 import Copts.Parser.Element
 
+import Text.Megaparsec.String (Parser)
 
-data Type = Optional | Ellipsis | XOR | Required
+data Usage =  Optional [Usage]
+           | Required [Usage]
+           | Ellipsis [Usage]
+           | XOR [Usage]
+           | A Element
     deriving (Show, Eq)
 
-data Usage =  Groups Type [Usage] | Elements [Element]
-    deriving (Show, Eq)
+
+any :: [Parser p] -> Parser p
+any = tryAll . map (spaces *>)
+
+elements = A <$> element
+
+arguments = A <$> argument
 
 
-any = some . tryAll . map (spaces *>)
+xor = XOR . concat <$> components <:> (some $ separator '|' *> components)
+    where components = some . try . any $ [elements, required, optional]
 
-elements = Elements <$> (some . try $ spaces *> element)
+ellipsis = Ellipsis <$> some component <* string "..."
+    where component = any [arguments, optional, required]
 
-arguments = Elements <$> (some . try $ spaces *> argument)
+required = Required <$> between (char '(') (char ')') (some component)
+    where component = any [xor, ellipsis, elements, optional]
 
+optional = Optional <$> between (char '[') (char ']') (some component)
+    where component = any [xor, ellipsis, elements, required]
 
-xor = Groups XOR . concat <$> components <:> (some $ separator '|' *> components)
-    where components = any [elements, required, optional]
-
-ellipsis = Groups Ellipsis <$> components <* string "..."
-    where components = any [arguments, optional, required]
-
-required = Groups Required <$> between (char '(') (char ')') components
-    where components = any [xor, ellipsis, elements, optional]
-
-optional = Groups Optional <$> between (char '[') (char ']') components
-    where components = any [xor, ellipsis, elements, required]
-
-usage = any [xor, ellipsis, elements, required, try optional]
+usage = some $ try $ any [xor, ellipsis, elements, required, optional]

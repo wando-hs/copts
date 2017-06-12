@@ -1,5 +1,5 @@
 module Copts.Parser.OptionDetails
-    (OptionDetail (..), Parameter (..), description, options, details)
+    (OptionDetail (..), Parameter (..), details)
     where
 
 import Text.Megaparsec.String (Parser)
