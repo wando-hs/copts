@@ -18,7 +18,9 @@ data Element = Command String | Argument String | Option (Flag, Maybe String)
 name = letterChar <:> (try $ many character)
     where character = try alphaNumChar <|> oneOf ['-', '_']
 
-parameter = try argument' <|> some upperChar
+argument' = between (char '<') (char '>') name
+
+parameter = label "parameter" $ try argument' <|> some upperChar
 
 shortOption = liftA2 (,) flag (optional $ param)
     where flag = Short <$ string "-" <*> letterChar
@@ -28,17 +30,15 @@ longOption = liftA2 (,) flag (optional $ param)
     where flag = Long <$ string "--" <*> name
           param = try $ ignoreOneOf ['=', ' '] *> parameter
 
-argument' = between (char '<') (char '>') name
-
 command' = try name <|> string "--" <|> string "-"
 
 option' = try shortOption <|> longOption
 
 
-argument = Argument <$> argument'
+argument = label "argument" $ Argument <$> argument'
 
-command = Command <$> command'
+command = label "command" $ Command <$> command'
 
-option = Option <$> option'
+option = label "option" $ Option <$> option'
 
 element = tryAll [argument, option, command]

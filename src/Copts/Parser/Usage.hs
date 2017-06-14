@@ -1,43 +1,50 @@
-module Copts.Parser.Usage (Usage (..), usage, xor) where
+module Copts.Parser.Usage (Usage (..), usage, exclusive) where
 
-import Text.Megaparsec (char, between, try, some, many, string, eol, newline)
+import Text.Megaparsec (char, between, try, some, many, string, eol, label)
 import Prelude (Show, Eq, ($), (.), (++), concat, foldr1, map, init, last)
 import Control.Applicative ((<*>), (*>), (<*), (<|>), liftA2, pure)
 import Data.Functor ((<$>), (<$))
 
 import Copts.Applicative ((<:>))
 import Copts.Parser.Combinators
-import Copts.Parser.Element
+import qualified Copts.Parser.Element as E
 
-import Text.Megaparsec.String (Parser)
 
-data Usage =  Optional [Usage]
+data Usage = Optional [Usage]
            | Required [Usage]
-           | Ellipsis Usage
-           | XOR [Usage]
-           | A Element
+           | Repeated Usage
+           | Exclusive [Usage]
+           | A E.Element
     deriving (Show, Eq)
 
 
-any :: [Parser p] -> Parser p
 any = tryAll . map (spaces *>)
 
-elements = A <$> element
+element = A <$> E.element
+command = A <$> E.command
+argument = A <$> E.argument
 
-arguments = A <$> argument
 
+exclusive = label "exclusive group"
+	$ Exclusive . concat
+	<$> components
+	<:> (some $ separator '|' *> components)
+    where components = some . try . any $ [repeated, element, required, optional]
 
-xor = XOR . concat <$> components <:> (some $ separator '|' *> components)
-    where components = some . try . any $ [ellipsis, elements, required, optional]
+repeated = label "repeated group"
+	$ Repeated
+	<$> component
+	<* string "..."
+    where component = any [argument, optional, required]
 
-ellipsis = Ellipsis <$> component <* string "..."
-    where component = any [arguments, optional, required]
+required = label "required group"
+	$ Required
+	<$> between (char '(') (char ')') (some component)
+    where component = any [exclusive, repeated, element, optional]
 
-required = Required <$> between (char '(') (char ')') (some component)
-    where component = any [xor, ellipsis, elements, optional]
+optional = label "optional group"
+	$ Optional
+	<$> between (char '[') (char ']') (some component)
+    where component = any [exclusive, repeated, element, required]
 
-optional = Optional <$> between (char '[') (char ']') (some component)
-    where component = any [xor, ellipsis, elements, required]
-
-usage :: Parser [Usage]
-usage = elements <:> many (any [xor, ellipsis, elements, required, optional])
+usage = command <:> many (any [exclusive, repeated, element, required, optional])
