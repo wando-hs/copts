@@ -2,9 +2,15 @@ module Copts.Parser.Element
     (Element (..), Flag (..), argument, command, option, option', element)
     where
 
-import Text.Megaparsec hiding (option)
-import Control.Applicative
-import Copts.Applicative ((<:>))
+
+import Text.Megaparsec (string, label, try, char, letterChar, upperChar, oneOf,
+                        between, alphaNumChar)
+import Control.Applicative (many, some, optional, liftA2, (<*>), (*>), (<|>))
+import Prelude (Show, Eq, String, Char, ($))
+import Data.Functor ((<$>), (<$))
+import Data.Maybe (Maybe)
+
+import Copts.Applicative
 import Copts.Parser.Combinators
 
 
