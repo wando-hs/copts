@@ -2,26 +2,24 @@ module Copts.Parser.OptionDetails
     (OptionDetail (..), Parameter (..), details)
     where
 
-import Text.Megaparsec.String (Parser)
-import Text.Megaparsec (try, eol, char, eof, string, lookAhead, anyChar, someTill)
-import Data.Set (fromList, elemAt, size)
-import Data.Maybe (isJust)
-import Control.Applicative
-import Control.Monad (void)
 
-import Copts.Applicative ((<:>))
+import Text.Megaparsec (try, eol, char, eof, string, lookAhead, anyChar, someTill)
+import Control.Applicative (pure, optional, many, (<|>), (*>), (<*>))
+import Data.Set (fromList, elemAt, size)
+import Control.Monad (void, fail)
+import Data.Functor ((<$>))
+import Data.Maybe (Maybe (..), isJust)
+import Data.Either (Either (..), either)
+
+import Copts.Applicative
 import Copts.Parser.Combinators
 import Copts.Parser.Element
 
 
-type Description = String
-type DefaultValue = String
-type Name = String
-
-data Parameter = Parameter Name (Maybe DefaultValue)
+data Parameter = Parameter String (Maybe String)
     deriving (Show, Eq)
 
-data OptionDetail = Details [Flag] (Maybe Parameter) Description
+data OptionDetail = Details [Flag] (Maybe Parameter) String
     deriving (Show, Eq)
 
 

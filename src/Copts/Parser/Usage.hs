@@ -1,22 +1,25 @@
-module Copts.Parser.Usage (Usage (..), usage, exclusive) where
+module Copts.Parser.Usage
+    (Pattern (..), Usage, usage, exclusive)
+    where
 
 import Text.Megaparsec (char, between, try, some, many, string, eol, label)
 import Prelude (Show, Eq, ($), (.), (++), concat, foldr1, map, init, last)
 import Control.Applicative ((<*>), (*>), (<*), (<|>), liftA2, pure)
 import Data.Functor ((<$>), (<$))
 
-import Copts.Applicative ((<:>))
+import Copts.Applicative
 import Copts.Parser.Combinators
 import qualified Copts.Parser.Element as E
 
 
-data Usage = Optional [Usage]
-           | Required [Usage]
-           | Repeated Usage
-           | Exclusive [Usage]
-           | A E.Element
-    deriving (Show, Eq)
+data Pattern = Optional [Pattern]
+	     | Required [Pattern]
+             | Repeated Pattern
+             | Exclusive [Pattern]
+             | A E.Element
+             deriving (Show, Eq)
 
+type Usage = [Pattern]
 
 any = tryAll . map (spaces *>)
 
