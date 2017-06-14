@@ -13,7 +13,7 @@ import Text.Megaparsec.String (Parser)
 
 data Usage =  Optional [Usage]
            | Required [Usage]
-           | Ellipsis [Usage]
+           | Ellipsis Usage
            | XOR [Usage]
            | A Element
     deriving (Show, Eq)
@@ -28,9 +28,9 @@ arguments = A <$> argument
 
 
 xor = XOR . concat <$> components <:> (some $ separator '|' *> components)
-    where components = some . try . any $ [elements, required, optional]
+    where components = some . try . any $ [ellipsis, elements, required, optional]
 
-ellipsis = Ellipsis <$> some component <* string "..."
+ellipsis = Ellipsis <$> component <* string "..."
     where component = any [arguments, optional, required]
 
 required = Required <$> between (char '(') (char ')') (some component)
@@ -39,4 +39,5 @@ required = Required <$> between (char '(') (char ')') (some component)
 optional = Optional <$> between (char '[') (char ']') (some component)
     where component = any [xor, ellipsis, elements, required]
 
-usage = some $ try $ any [xor, ellipsis, elements, required, optional]
+usage :: Parser [Usage]
+usage = elements <:> many (any [xor, ellipsis, elements, required, optional])

@@ -19,6 +19,6 @@ description = manyTill anyChar $ string "Usage:"
 
 help = do
     d <- description
-    u <- some $ space *> usage
-    _ <- space <* (void . try . string $ "Options:") *> space
+    u <- some $ try (space *> usage)
+    -- _ <- space <* string "Options:"
     pure $ Simple d u
