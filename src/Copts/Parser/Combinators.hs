@@ -1,5 +1,5 @@
 module Copts.Parser.Combinators
-  (end, spaces, separator, ignore, ignoreOneOf, internalize, tryAll, delimitedBy)
+  (end, spaces, separator, ignore, ignoreOneOf, internalize, tryAll, point)
   where
 
 
@@ -20,8 +20,8 @@ ignore = void . try . char
 ignoreOneOf :: String -> Parser ()
 ignoreOneOf = void . try . oneOf
 
-delimitedBy :: String -> String -> Parser String
-delimitedBy a b = (string a) *> manyTill anyChar (string b)
+point :: Parser Char
+point = char '.'
 
 spaces :: Parser ()
 spaces = void . many . char $ ' '
