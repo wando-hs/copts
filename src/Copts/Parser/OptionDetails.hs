@@ -3,13 +3,13 @@ module Copts.Parser.OptionDetails
     where
 
 
-import Text.Megaparsec (try, eol, char, eof, string, lookAhead, anyChar, someTill)
-import Control.Applicative (pure, optional, many, (<|>), (*>), (<*>))
+import Text.Megaparsec (try, eol, char, eof, between, string, noneOf, lookAhead, anyChar, someTill)
+import Control.Applicative (pure, optional, many, some, (<|>), (*>), (<*>))
 import Data.Set (fromList, elemAt, size)
+import Data.Either (Either (..), either)
+import Data.Maybe (Maybe (..), isJust)
 import Control.Monad (void, fail)
 import Data.Functor ((<$>))
-import Data.Maybe (Maybe (..), isJust)
-import Data.Either (Either (..), either)
 
 import Copts.Applicative
 import Copts.Parser.Combinators
@@ -24,9 +24,10 @@ data OptionDetail = Details [Flag] (Maybe Parameter) String
 
 
 description = someTill anyChar (try end <|> parameter)
-    where parameter = void . lookAhead . string $ "[default:"
+    where parameter = void . lookAhead . string $ "[default: "
 
-defaultValue = delimitedBy "[default: " "]"
+defaultValue = string "[default: "
+    *> someTill anyChar (char ']' <* optional point)
 
 parameter Nothing = pure Nothing
 parameter (Just name) = Just

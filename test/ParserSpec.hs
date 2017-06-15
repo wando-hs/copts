@@ -28,7 +28,7 @@ navalFate = "Naval Fate.\n\
 \Options:\n\
 \  -h --help     Show this screen.\n\
 \  --version     Show version.\n\
-\  --speed=<kn>  Speed in knots [default: 10]\n\
+\  --speed=<kn>  Speed in knots [default: 10].\n\
 \  --moored      Moored (anchored) mine.\n\
 \  --drifting    Drifting mine."
 
