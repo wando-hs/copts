@@ -1,4 +1,15 @@
-module Copts.Parser (Help (..), help) where
+module Copts.Parser
+    (
+      Help (..)
+    , Usage (..)
+    , Pattern (..)
+    , OptionDetail (..)
+    , Parameter (..)
+    , Flag (..)
+    , Element (..)
+    , help
+    ) where
+
 
 import Text.Megaparsec (string, anyChar, manyTill, space, newline, try)
 import Control.Applicative ((*>), pure, some, many)
@@ -6,8 +17,9 @@ import Prelude (Show, Eq, String, null, ($))
 
 import Copts.Applicative
 import Copts.Parser.Usage
-import Copts.Parser.OptionDetails
+import Copts.Parser.Element
 import Copts.Parser.Combinators
+import Copts.Parser.OptionDetails
 
 
 data Help = Simple String [Usage] | Complex String [Usage] [OptionDetail]

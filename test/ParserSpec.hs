@@ -1,19 +1,9 @@
 module ParserSpec where
 
+import Helpers
 import Test.Hspec
-import Test.Hspec.Megaparsec
-
-import Text.Megaparsec.String (Parser)
-import qualified Text.Megaparsec as M (parse)
-
 import Copts.Parser
-import Copts.Parser.Usage
-import Copts.Parser.Element
-import Copts.Parser.OptionDetails
 
-
-parse :: (Show a, Eq a) => (Parser a, String) -> a -> Expectation
-parse (parser, text) result = M.parse parser "" text `shouldParse` result
 
 navalFate = "Naval Fate.\n\
 \\n\
