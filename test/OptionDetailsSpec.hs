@@ -1,24 +1,10 @@
 module OptionDetailsSpec where
 
+
+import Helpers
 import Test.Hspec
-import Test.Hspec.Megaparsec
-
-import Text.Megaparsec.String (Parser)
-import qualified Text.Megaparsec as M (Dec (..), parse, errorCustom)
-
-import Data.Set (fromList)
-import Data.Bifunctor (first)
-
 import Copts.Parser.Element
 import Copts.Parser.OptionDetails
-
-
-parse :: (Show a, Eq a) => (Parser a, String) -> a -> Expectation
-parse (parser, text) result = M.parse parser "" text `shouldParse` result
-
-failWith = (. err) . shouldBe . fail
-    where err  = Left . fromList . fmap M.DecFail
-          fail = first M.errorCustom . M.parse details ""
 
 
 spec = let text #> result = parse (details, text) result in
@@ -33,5 +19,5 @@ spec = let text #> result = parse (details, text) result in
       "--stdout  Use stdout."                              #> Details [Long "stdout"] Nothing "Use stdout."
 
     it "invalid options" $ do
-      failWith "-a A --bb B  Teste" ["Ta de brincation"]
+      failWith details "-a A --bb B  Teste" ["Ta de brincation"]
 
