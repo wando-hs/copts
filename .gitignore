@@ -19,3 +19,4 @@ copts.cabal
 .stack-work/
 cabal.project.local
 .HTF/
+samples/
