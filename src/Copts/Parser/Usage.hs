@@ -16,9 +16,9 @@ import Copts.Parser.Combinators
 import qualified Copts.Parser.Element as E
 
 
-data Pattern = Optional [Pattern]
-             | Required [Pattern]
-             | Exclusive [Pattern]
+data Pattern = Optional Usage
+             | Required Usage
+             | Exclusive [Usage]
              | Repeated Pattern
              | A E.Element
              | Options
@@ -35,7 +35,7 @@ argument = A <$> E.argument
 
 
 exclusive = label "exclusive group"
-    $ Exclusive . concat
+    $ Exclusive
     <$> patterns
     <:> (some $ separator '|' *> patterns)
     where patterns = some . try . any $ [repeated, element, required, optional]
