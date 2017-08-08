@@ -1,7 +1,7 @@
 module Main where
 
 
-import Text.Megaparsec (parse, parseMaybe)
+import Text.Megaparsec (parseMaybe)
 import System.Environment (getArgs)
 
 import Copts.Normalizer (normalize)
