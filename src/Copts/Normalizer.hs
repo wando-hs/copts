@@ -34,8 +34,8 @@ toUsage :: D.Map String Pattern -> P.Usage -> Usage
 toUsage d = map (toPattern d)
 
 label :: P.Flag -> String
-label (P.Short name) = [name]
-label (P.Long name) = name
+label (P.Short name) = ['-', name]
+label (P.Long name) =  "--" ++ name
 
 toDetails :: P.OptionDetail -> [(String, Pattern)]
 toDetails (P.Details flags param _) = map (\ l -> (l, opt)) labels
