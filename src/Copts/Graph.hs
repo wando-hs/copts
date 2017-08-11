@@ -2,23 +2,27 @@ module Copts.Graph where
 
 import Text.Megaparsec
 import Text.Megaparsec.String
-import Algebra.Graph
+import Algebra.Graph hiding (graph)
 
 import Data.Foldable (foldr, foldl, concat, concatMap)
 import Data.Maybe (Maybe(..))
-import Data.List (delete, map, (++), unzip3, unwords)
-import Prelude (Show, Eq, Ord(..), String, Bool(..), id, const, (.), ($))
+import Data.List (delete, map, zip, (++), unzip3, unwords)
+import Prelude (Show(..), Eq, Ord(..), String, Bool(..), id, const, (.), ($))
 
 import Copts.Applicative
 import Copts.Normalizer
 
 
 data Node = Text String | Input String
-    deriving (Show, Eq)
+    deriving (Eq)
 
 type Border = [Node]
 
 type SubGraph = (Border, Graph Node, Border)
+
+instance Show Node where
+    show (Text t) = t
+    show (Input t) = '<' : t ++ ">"
 
 instance Ord Node where
     (Text _) <= (Input _) = False
@@ -54,7 +58,8 @@ fromUsage border (p:ps) = foldl conn (fromPattern border p) ps
     where conn (h, a, t) = trimap (const h) (overlay a) id . fromPattern t
 
 fromParameter :: Border -> Maybe (String, Maybe String) -> SubGraph
-fromParameter b Nothing = (b, empty, b)
+fromParameter b Nothing = ([], empty, b)
+
 fromParameter b (Just (label, Nothing)) = singleton b $ Input label
 fromParameter b (Just (label, Just _)) = ([param], blackhole b param, param : b)
     where param = Input label
@@ -75,8 +80,11 @@ fromPattern border (Repeated p) =  cycle $ fromPattern border p
 
 fromPattern border (Exclusive us) = trimap concat overlays concat $ unzip3 $ map (fromUsage border) us
 
-fromPattern border (Optional u) = cartesian $ map (fromPattern border) u
-
+fromPattern border (Optional u) = trimap id id (border ++) $ cartesian $ map (fromPattern border) u
 
 graph :: Usage -> Graph Node
-graph = snd . fromUsage []
+graph (p:ps) = snd $ fromUsage (fst $ fromPattern [] p) ps
+
+graph' :: [Usage] -> Graph Node
+graph' us = overlays $ map banana $ zip [0..] us
+    where banana (i, u) = graph u
