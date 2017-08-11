@@ -1,4 +1,4 @@
-module Copts.Graph where
+module Copts.Graph (Node(..), Border, graph) where
 
 import Text.Megaparsec
 import Text.Megaparsec.String
@@ -7,7 +7,7 @@ import Algebra.Graph hiding (graph)
 import Data.Foldable (foldr, foldl, concat, concatMap)
 import Data.Maybe (Maybe(..))
 import Data.List (delete, map, zipWith, (++), unzip3, unwords)
-import Prelude (Int, Show(..), Eq, Ord(..), String, Bool(..), id, curry, const, (&&), (.), ($))
+import Prelude (Int, Show(..), Eq, Ord(..), String, Bool(..), id, uncurry, curry, const, (&&), (.), ($))
 
 import Copts.Applicative
 import Copts.Normalizer
@@ -83,9 +83,6 @@ fromPattern l border (Exclusive us) = trimap concat overlays concat $ unzip3 $ m
 
 fromPattern l border (Optional u) = trimap id id (border ++) $ cartesian $ map (fromPattern l border) u
 
-graph :: Line -> Usage -> Graph Node
-graph l (p:ps) = snd $ fromUsage l (fst $ fromPattern 0 [] p) ps
-
-graph' :: [Usage] -> Graph Node
-graph' = overlays . zipWith (curry banana) [1 ..]
-    where banana (l, u) = graph l u
+graph :: [Usage] -> Graph Node
+graph = overlays . zipWith build [1 ..]
+    where build l (p:ps) = snd $ fromUsage l (fst $ fromPattern 0 [] p) ps
