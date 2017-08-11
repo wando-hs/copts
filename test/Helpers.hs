@@ -12,6 +12,6 @@ parse :: (Show a, Eq a) => (Parser a, String) -> a -> Expectation
 parse (parser, text) result = M.parse parser "" text `shouldParse` result
 
 failWith :: (Show a, Eq a) => Parser a -> String -> [String] -> Expectation
-failWith p = (. err) . shouldBe . fail
-    where err  = Left . fromList . fmap M.DecFail
+failWith p = (. error) . shouldBe . fail
+    where error  = Left . fromList . fmap M.DecFail
           fail = first M.errorCustom . M.parse p ""

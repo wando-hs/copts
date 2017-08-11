@@ -13,7 +13,7 @@ module Copts.Parser
 
 import Text.Megaparsec (string, anyChar, manyTill, space, newline, try)
 import Control.Applicative ((*>), pure, some, many)
-import Prelude (Show, Eq, String, null, ($))
+import Prelude (Show(..), Eq, String, null, map, unlines, (++), ($))
 
 import Copts.Applicative
 import Copts.Parser.Usage
@@ -23,7 +23,11 @@ import Copts.Parser.OptionDetails
 
 
 data Help = Simple String [Usage] | Complex String [Usage] [OptionDetail]
-    deriving (Show, Eq)
+    deriving (Eq)
+
+instance Show Help where
+    show (Simple d us) = d ++ "\n Usage:\n" ++ (unlines $ map show us)
+    show (Complex d us ds) = d ++ "\n Usage:\\n" ++ (unlines $ map show us) ++ "\n Options:\n" ++ (unlines $ map show ds)
 
 
 description = manyTill anyChar $ try (space *> string "Usage:")

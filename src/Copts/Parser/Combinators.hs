@@ -4,8 +4,8 @@ module Copts.Parser.Combinators
 
 
 import Prelude (String, Char, last, init, foldr1, map, snd, fst, (.), ($), (++))
-import Text.Megaparsec (try, oneOf, char, anyChar, string, manyTill, eol, eof)
-import Control.Applicative (liftA2, optional, many, (<|>), (<*), (*>), pure)
+import Text.Megaparsec (try, oneOf, char, eol, eof)
+import Control.Applicative (liftA2, optional, many, (<|>), (<*), pure)
 import Text.Megaparsec.String (Parser)
 import Control.Monad (void)
 import Data.Functor (Functor, fmap)

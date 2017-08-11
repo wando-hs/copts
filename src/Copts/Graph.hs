@@ -7,31 +7,33 @@ import Algebra.Graph hiding (graph)
 import Data.Foldable (foldr, foldl, concat, concatMap)
 import Data.Maybe (Maybe(..))
 import Data.List (delete, map, zip, (++), unzip3, unwords)
-import Prelude (Show(..), Eq, Ord(..), String, Bool(..), id, const, (.), ($))
+import Prelude (Int, Show(..), Eq, Ord(..), String, Bool(..), id, const, (&&), (.), ($))
 
 import Copts.Applicative
 import Copts.Normalizer
 
 
-data Node = Text String | Input String
+data Node = Text Line String | Input Line String
     deriving (Eq)
 
 type Border = [Node]
 
 type SubGraph = (Border, Graph Node, Border)
 
+type Line = Int
+
 instance Show Node where
-    show (Text t) = t
-    show (Input t) = '<' : t ++ ">"
+    show (Text l t) = "[" ++ show l ++ "] " ++ t
+    show (Input l t) = "[" ++ show l ++ "] " ++ t
 
 instance Ord Node where
-    (Text _) <= (Input _) = False
-    (Input _) <= (Text _) = True
-    (Text t) <= (Text t') = t <= t'
-    (Input i) <= (Input i') = i <= i'
+    (Text _ _) <= (Input _ _) = False
+    (Input _ _) <= (Text _ _) = True
+    (Text l t) <= (Text l' t') = (show l ++ t) <= (show l' ++ t')
+    (Input l t) <= (Input l' t') = (show l ++ t) <= (show l' ++ t')
 
 
-trimap f fromPattern h (a, b, c) = (f a, fromPattern b, h c)
+trimap f g h (a, b, c) = (f a, g b, h c)
 
 fst (x,_,_) = x
 snd (_,x,_) = x
@@ -49,42 +51,41 @@ cycle (h, a, t) = (h, overlay a (biclique h t), h ++ t)
 
 cartesian :: [SubGraph] -> SubGraph
 cartesian subgs = trimap concat (overlays . (g :)) concat $ unzip3 subgs
-    where g = foldr (overlay . conn subgs) empty subgs
+    where g = overlays $ map (conn subgs) subgs
           conn as a = biclique (trd a) . concatMap fst $ delete a as
 
 
-fromUsage :: Border -> Usage -> SubGraph
-fromUsage border (p:ps) = foldl conn (fromPattern border p) ps
-    where conn (h, a, t) = trimap (const h) (overlay a) id . fromPattern t
+fromUsage :: Line -> Border -> Usage -> SubGraph
+fromUsage l border (p:ps) = foldl conn (fromPattern l border p) ps
+    where conn (h, a, t) = trimap (const h) (overlay a) id . fromPattern l t
 
-fromParameter :: Border -> Maybe (String, Maybe String) -> SubGraph
-fromParameter b Nothing = ([], empty, b)
+fromParameter :: Line -> Border -> Maybe (String, Maybe String) -> SubGraph
+fromParameter l b Nothing = ([], empty, [])
+fromParameter l b (Just (label, Nothing)) = singleton b $ Input l label
+fromParameter l b (Just (label, Just _)) = ([param], blackhole b param, param : b)
+    where param = Input l label
 
-fromParameter b (Just (label, Nothing)) = singleton b $ Input label
-fromParameter b (Just (label, Just _)) = ([param], blackhole b param, param : b)
-    where param = Input label
+fromPattern :: Line -> Border -> Pattern -> SubGraph
+fromPattern l b (Argument label) = singleton b $ Input l label
 
-fromPattern :: Border -> Pattern -> SubGraph
-fromPattern b (Argument label) = singleton b $ Input label
+fromPattern l b (Command name) = singleton b $ Text l name
 
-fromPattern b (Command name) = singleton b $ Text name
+fromPattern l border (Option fs p) = ([n], overlays gs, e)
+    where (w, param, e) = fromParameter l [n] p
+          n = Text l $ unwords fs
+          gs = [param, blackhole border n, star n w]
 
-fromPattern border (Option fs p) = ([n], overlays gs, e)
-    where (w, param, e) = fromParameter [n] p
-          n = Text $ unwords fs
-          gs = [param, (blackhole border n), (star n w)]
+fromPattern l border (Required u) = fromUsage l border u
 
-fromPattern border (Required u) = fromUsage border u
+fromPattern l border (Repeated p) =  cycle $ fromPattern l border p
 
-fromPattern border (Repeated p) =  cycle $ fromPattern border p
+fromPattern l border (Exclusive us) = trimap concat overlays concat $ unzip3 $ map (fromUsage l border) us
 
-fromPattern border (Exclusive us) = trimap concat overlays concat $ unzip3 $ map (fromUsage border) us
+fromPattern l border (Optional u) = trimap id id (border ++) $ cartesian $ map (fromPattern l border) u
 
-fromPattern border (Optional u) = trimap id id (border ++) $ cartesian $ map (fromPattern border) u
-
-graph :: Usage -> Graph Node
-graph (p:ps) = snd $ fromUsage (fst $ fromPattern [] p) ps
+graph :: Line -> Usage -> Graph Node
+graph l (p:ps) = snd $ fromUsage l (fst $ fromPattern 0 [] p) ps
 
 graph' :: [Usage] -> Graph Node
-graph' us = overlays $ map banana $ zip [0..] us
-    where banana (i, u) = graph u
+graph' us = overlays $ map banana $ zip [1..] us
+    where banana (l, u) = graph l u
