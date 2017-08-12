@@ -1,6 +1,12 @@
 all: watch
 
-watch:
+clean:
+	@stack clean
+
+install: clean
+	@stack install
+
+watch: clean
 	@stack build --test --fast --file-watch --exec '$(MAKE) plot'
 
 plot: .
