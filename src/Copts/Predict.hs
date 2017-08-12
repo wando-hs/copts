@@ -2,7 +2,7 @@ module Copts.Predict (predict) where
 
 import Algebra.Graph (Graph, edgeList, vertexList)
 import Data.Map.Strict (Map, (!), fromList)
-import Data.List (find, filter)
+import Data.List (find, filter, isPrefixOf)
 
 import Copts.Graph
 
@@ -18,11 +18,18 @@ match :: Node -> String -> Bool
 match (Text _ a) param = a == param
 match (Input _ _) _ = True
 
+partialMatch :: Node -> String -> Bool
+partialMatch (Text _ a) param = param `isPrefixOf` a
+partialMatch (Input _ _) _ = True
+
 predict' :: Node -> Map Node [Node] -> [String] -> [Node]
-predict' n m [p] = if match n p then m ! n else []
+predict' n m [p]
+    | match n p = m ! n
+    | partialMatch n p = [n]
+    | otherwise = []
 predict' n m (p:ps)
-  | match n p = concatMap (\n' -> predict' n' m ps) $ m ! n
-  | otherwise = []
+    | match n p = concatMap (\n' -> predict' n' m ps) $ m ! n
+    | otherwise = []
 
 
 predict :: [String] -> Graph Node -> [Node]
