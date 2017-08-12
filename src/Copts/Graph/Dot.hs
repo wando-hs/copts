@@ -33,5 +33,5 @@ style = Style
     , edgeAttributes          = edgeStyle
     }
 
-plot :: Graph Node -> String
+plot :: Graph Vertex -> String
 plot = export style
