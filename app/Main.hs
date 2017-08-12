@@ -24,9 +24,9 @@ ha (Input _ label) = label
 options :: [String] -> IO ()
 options ("parse":text:_) = print $ parse help "" text
 options ("normalize":text:_) = print $ normalize <$> parseMaybe help text
-options ("graph":text:_) = fromJust $ putStrLn . plot . graph . normalize <$> parseMaybe help text
+options ("graph":text:_) = fromJust $ putStrLn . plot . snd . graph . normalize <$> parseMaybe help text
 options ("predict":text:params) = fromJust $ putStrLn . unwords . nub . map ha . predictions <$> parseMaybe help text
-    where predictions = filter banana . predict params . graph . normalize
+    where predictions = filter banana . predict params . snd . graph . normalize
 options x = mempty
 
 main = options =<< getArgs
