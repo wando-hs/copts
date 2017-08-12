@@ -14,7 +14,7 @@ import Copts.Normalizer
 
 
 data Node = Text Line String | Input Line String
-    deriving (Eq)
+    deriving (Show, Eq)
 
 type Border = [Node]
 
@@ -22,16 +22,12 @@ type SubGraph = (Border, Graph Node, Border)
 
 type Line = Int
 
-instance Show Node where
-    show (Text l t) = "[" ++ show l ++ "] " ++ t
-    show (Input l t) = "[" ++ show l ++ "] " ++ t
-
 instance Ord Node where
-    (Text _ _) <= (Input _ _) = False
-    (Input _ _) <= (Text _ _) = True
-    (Text l t) <= (Text l' t') = (show l ++ t) <= (show l' ++ t')
-    (Input l t) <= (Input l' t') = (show l ++ t) <= (show l' ++ t')
+    node1 <= node2 = content node1 <= content node2
 
+
+content (Text l t) = show l ++ t
+content (Input l t) = show l ++ t
 
 trimap f g h (a, b, c) = (f a, g b, h c)
 
