@@ -1,4 +1,4 @@
-module Copts.Graph (Vertex(..), InterfaceGraph, Border, graph) where
+module Copts.Graph (Vertex(..), InterfaceGraph, graph) where
 
 import Text.Megaparsec
 import Text.Megaparsec.String
