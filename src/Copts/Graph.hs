@@ -1,4 +1,4 @@
-module Copts.Graph (Vertex(..), Border, graph) where
+module Copts.Graph (Vertex(..), InterfaceGraph, Border, graph) where
 
 import Text.Megaparsec
 import Text.Megaparsec.String
@@ -85,6 +85,10 @@ fromPattern l border (Exclusive us) = trimap concat overlays concat $ unzip3 $ m
 
 fromPattern l border (Optional u) = trimap id id (border ++) $ cartesian $ map (fromPattern l border) u
 
-graph :: [Usage] -> Graph
-graph = overlays . zipWith build [1 ..]
-    where build l (p:ps) = snd $ fromUsage l (fst $ fromPattern 0 [] p) ps
+rootVertex :: [Usage] -> Vertex
+rootVertex = head . fst . fromPattern 0 [] . head . head
+
+graph :: [Usage] -> InterfaceGraph
+graph us = (root, overlays $ zipWith build [1 ..] us)
+    where build l = snd . fromUsage l [root] . tail
+          root = rootVertex us
