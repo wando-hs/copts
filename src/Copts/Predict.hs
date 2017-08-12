@@ -14,15 +14,15 @@ reachability g = fromList $ map reachable vertices
           edges = edgeList g
 
 
-match :: Node -> String -> Bool
+match :: Vertex -> String -> Bool
 match (Text _ a) param = a == param
 match (Input _ _) _ = True
 
-partialMatch :: Node -> String -> Bool
+partialMatch :: Vertex -> String -> Bool
 partialMatch (Text _ a) param = param `isPrefixOf` a
 partialMatch (Input _ _) _ = True
 
-predict' :: Node -> Map Node [Node] -> [String] -> [Node]
+predict' :: Vertex -> Map Vertex [Vertex] -> [String] -> [Vertex]
 predict' n m [p]
     | match n p = m ! n
     | partialMatch n p = [n]
@@ -32,6 +32,6 @@ predict' n m (p:ps)
     | otherwise = []
 
 
-predict :: [String] -> Graph Node -> [Node]
+predict :: [String] -> Graph Vertex -> [Vertex]
 predict (n:ns) g = predict' root (reachability g) $ n:ns
     where root = Text 0 n

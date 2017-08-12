@@ -1,28 +1,34 @@
-module Copts.Graph (Node(..), Border, graph) where
+module Copts.Graph (Vertex(..), Border, graph) where
 
 import Text.Megaparsec
 import Text.Megaparsec.String
-import Algebra.Graph hiding (graph)
+import Algebra.Graph (connect, connects, overlay, overlays, empty, star, biclique)
+import qualified Algebra.Graph as Alga
+
+import Prelude hiding (cycle, fst, snd)
 
 import Data.Foldable (foldr, foldl, concat, concatMap)
 import Data.Maybe (Maybe(..))
 import Data.List (delete, map, zipWith, (++), unzip3, unwords)
-import Prelude (Int, Show(..), Eq, Ord(..), String, Bool(..), id, uncurry, curry, const, (&&), (.), ($))
 
 import Copts.Applicative
 import Copts.Normalizer
 
 
-data Node = Text Line String | Input Line String
-    deriving (Show, Eq)
+type InnerGraph = (Border, Graph, Border)
+type Border = [Vertex]
 
-type Border = [Node]
-
-type SubGraph = (Border, Graph Node, Border)
-
+type Graph = Alga.Graph Vertex
 type Line = Int
 
-instance Ord Node where
+
+type Root = Vertex
+type InterfaceGraph = (Root, Graph)
+
+data Vertex = Text Line String | Input Line String
+    deriving (Show, Eq)
+
+instance Ord Vertex where
     node1 <= node2 = content node1 <= content node2
 
 
@@ -36,32 +42,32 @@ snd (_,x,_) = x
 trd (_,_,x) = x
 
 
-blackhole :: Border -> Node -> Graph Node
+blackhole :: Border -> Vertex -> Graph
 blackhole border node = biclique border [node]
 
-singleton :: Border -> Node -> SubGraph
+singleton :: Border -> Vertex -> InnerGraph
 singleton border node = ([node], blackhole border node, [node])
 
-cycle :: SubGraph -> SubGraph
+cycle :: InnerGraph -> InnerGraph
 cycle (h, a, t) = (h, overlay a (biclique h t), h ++ t)
 
-cartesian :: [SubGraph] -> SubGraph
+cartesian :: [InnerGraph] -> InnerGraph
 cartesian subgs = trimap concat (overlays . (g :)) concat $ unzip3 subgs
     where g = overlays $ map (conn subgs) subgs
           conn as a = biclique (trd a) . concatMap fst $ delete a as
 
 
-fromUsage :: Line -> Border -> Usage -> SubGraph
+fromUsage :: Line -> Border -> Usage -> InnerGraph
 fromUsage l border (p:ps) = foldl conn (fromPattern l border p) ps
     where conn (h, a, t) = trimap (const h) (overlay a) id . fromPattern l t
 
-fromParameter :: Line -> Border -> Maybe (String, Maybe String) -> SubGraph
+fromParameter :: Line -> Border -> Maybe (String, Maybe String) -> InnerGraph
 fromParameter l b Nothing = ([], empty, [])
 fromParameter l b (Just (label, Nothing)) = singleton b $ Input l label
 fromParameter l b (Just (label, Just _)) = ([param], blackhole b param, param : b)
     where param = Input l label
 
-fromPattern :: Line -> Border -> Pattern -> SubGraph
+fromPattern :: Line -> Border -> Pattern -> InnerGraph
 fromPattern l b (Argument label) = singleton b $ Input l label
 
 fromPattern l b (Command name) = singleton b $ Text l name
@@ -79,6 +85,6 @@ fromPattern l border (Exclusive us) = trimap concat overlays concat $ unzip3 $ m
 
 fromPattern l border (Optional u) = trimap id id (border ++) $ cartesian $ map (fromPattern l border) u
 
-graph :: [Usage] -> Graph Node
+graph :: [Usage] -> Graph
 graph = overlays . zipWith build [1 ..]
     where build l (p:ps) = snd $ fromUsage l (fst $ fromPattern 0 [] p) ps
