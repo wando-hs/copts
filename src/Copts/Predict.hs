@@ -23,6 +23,7 @@ partialMatch (Text _ a) param = param `isPrefixOf` a
 partialMatch (Input _ _) _ = True
 
 predict' :: Vertex -> Map Vertex [Vertex] -> [String] -> [Vertex]
+predict' n m [] = [n]
 predict' n m [p]
     | match n p = m ! n
     | partialMatch n p = [n]
@@ -32,6 +33,6 @@ predict' n m (p:ps)
     | otherwise = []
 
 
-predict :: [String] -> Graph Vertex -> [Vertex]
-predict (n:ns) g = predict' root (reachability g) $ n:ns
-    where root = Text 0 n
+predict :: [String] -> InterfaceGraph -> [Vertex]
+predict [] (root, _) = [root]
+predict params (root, g) = predict' root (reachability g) params
