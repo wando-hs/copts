@@ -13,6 +13,8 @@ import Copts.Normalizer
 import Copts.Parser
 import Copts.Predict
 
+import Text.Show.Pretty
+
 
 banana (Text _ _) = True
 banana (Input _ label) = all isUpper label
@@ -22,11 +24,20 @@ ha (Input _ label) = label
 
 
 options :: [String] -> IO ()
-options ("parse":text:_) = print $ parse help "" text
-options ("normalize":text:_) = print $ normalize <$> parseMaybe help text
+options ("parse":text:_) = pPrint $ parse help "" text
+
+options ("normalize":text:_) = pPrint $ normalize <$> parseMaybe help text
+
 options ("graph":text:_) = fromJust $ putStrLn . plot . snd . graph . normalize <$> parseMaybe help text
+
 options ("predict":text:params) = fromJust $ putStrLn . unwords . nub . map ha . predictions <$> parseMaybe help text
     where predictions = filter banana . predict params . graph . normalize
-options x = mempty
+
+options x = putStr . unlines $
+    [ "Bash complete tool for POSIX help texts."
+    , "Usage:"
+    , "  copts (parse | normalize | plot | predict) <help>"
+    , "  copts -h | --help"
+    ]
 
 main = options =<< getArgs
