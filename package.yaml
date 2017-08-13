@@ -23,6 +23,7 @@ executables:
       - -with-rtsopts=-N
     dependencies:
       - copts
+      - pretty-show
 tests:
   copts-test:
     main: Spec.hs
