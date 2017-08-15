@@ -29,18 +29,15 @@ data Help = Simple String [Usage] | Complex String [Usage] [OptionDetail]
 
 header text = space *> string text *> spaces
 
+body parser = space *> parser <:> many (try line)
+    where line = newline *> spaces *> try parser
+
 description = manyTill anyChar (try $ header "Usage:")
-
-usages = space *> usage <:> many (try line)
-    where line = newline *> spaces *> usage
-
-options = space *> details <:> many (try line)
-    where line = space *> details
 
 from d u (Just o) = Complex d u o
 from d u Nothing = Simple d u
 
 help = from
     <$> description
-    <*> usages
-    <*> optional (header "Options:" *> options)
+    <*> body usage
+    <*> optional ( try (header "Options:" *> body details) )

@@ -1,11 +1,11 @@
 module Main where
 
 
-import Text.Megaparsec (parseMaybe, parse)
+import Text.Megaparsec (parse)
 import System.Environment (getArgs)
 import Data.Char (isUpper)
 import Data.List (nub)
-import Data.Maybe
+import System.IO (stderr, hPutStrLn)
 
 import Copts.Graph
 import Copts.Graph.Dot
@@ -22,15 +22,22 @@ banana (Input _ label) = all isUpper label
 ha (Text _ text) = text
 ha (Input _ label) = label
 
+print' (Right x) = putStrLn x
+print' (Left x) = hPutStrLn stderr $ ppShow x
+
 
 options :: [String] -> IO ()
 options ("parse":text:_) = pPrint $ parse help "" text
 
-options ("normalize":text:_) = pPrint $ normalize <$> parseMaybe help text
+options ("normalize":text:_) = pPrint $ normalize <$> parse help "" text
 
-options ("graph":text:_) = fromJust $ putStrLn . plot . snd . graph . normalize <$> parseMaybe help text
+options ("graph":text:_) = print'
+    $ plot . snd . graph . normalize
+    <$> parse help "" text
 
-options ("predict":text:params) = fromJust $ putStrLn . unwords . nub . map ha . predictions <$> parseMaybe help text
+options ("predict":text:params) = print'
+    $ unwords . nub . map ha . predictions
+    <$> parse help "" text
     where predictions = filter banana . predict params . graph . normalize
 
 options x = putStr . unlines $

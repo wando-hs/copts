@@ -20,7 +20,9 @@ navalFate = "Naval Fate.\n\
 \  --version     Show version.\n\
 \  --speed=<kn>  Speed in knots [default: 10].\n\
 \  --moored      Moored (anchored) mine.\n\
-\  --drifting    Drifting mine."
+\  --drifting    Drifting mine.\n\
+\\n\
+\Examples:"
 
 spec =
   describe "parsing a help text" $ do
