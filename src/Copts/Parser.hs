@@ -1,6 +1,5 @@
 module Copts.Parser
-    (
-      Help (..)
+    ( Help (..)
     , Usage (..)
     , Pattern (..)
     , OptionDetail (..)
@@ -12,7 +11,9 @@ module Copts.Parser
 
 
 import Text.Megaparsec (string, anyChar, manyTill, space, newline, try)
-import Control.Applicative ((*>), pure, some, many)
+import Text.Megaparsec.String
+import Control.Applicative ((*>), (<$>), (<*>), optional, pure, some, many)
+import Data.Maybe (Maybe(..))
 import Prelude (Show(..), Eq, String, null, map, unlines, (++), ($), (.))
 
 import Copts.Applicative
@@ -26,19 +27,20 @@ data Help = Simple String [Usage] | Complex String [Usage] [OptionDetail]
     deriving (Show, Eq)
 
 
-description = manyTill anyChar $ try (space *> string "Usage:")
+header text = space *> string text *> spaces
 
-options = space *> details <:> many (try line)
-    where line = space *> details
+description = manyTill anyChar (try $ header "Usage:")
 
 usages = space *> usage <:> many (try line)
     where line = newline *> spaces *> usage
 
+options = space *> details <:> many (try line)
+    where line = space *> details
 
-help = do
-    d <- description
-    u <- usages
-    space *> string "Options:"
+from d u (Just o) = Complex d u o
+from d u Nothing = Simple d u
 
-    o <- options
-    pure $ if null o then Simple d u else Complex d u o
+help = from
+    <$> description
+    <*> usages
+    <*> optional (header "Options:" *> options)
