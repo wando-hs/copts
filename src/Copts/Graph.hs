@@ -58,6 +58,7 @@ cartesian subgs = trimap concat (overlays . (g :)) concat $ unzip3 subgs
 
 
 fromUsage :: Line -> Border -> Usage -> InnerGraph
+fromUsage l border [] = (border, empty, [])
 fromUsage l border (p:ps) = foldl conn (fromPattern l border p) ps
     where conn (h, a, t) = trimap (const h) (overlay a) id . fromPattern l t
 
