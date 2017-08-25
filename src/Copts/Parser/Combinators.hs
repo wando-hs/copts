@@ -12,7 +12,7 @@ import Data.Functor (Functor, fmap)
 
 
 end :: Parser ()
-end = (try $ void eol) <|> void eof
+end = try (void eol) <|> void eof
 
 ignore :: Char -> Parser ()
 ignore = void . try . char
@@ -33,4 +33,4 @@ internalize :: Functor f => Parser (f (a, b) -> (f a, f b))
 internalize = pure $ liftA2 (,) (fmap fst) (fmap snd)
 
 tryAll :: [Parser a] -> Parser a
-tryAll l = foldr1 (<|>) (map try (init l) ++ [last l])
+tryAll = foldr1 (<|>) . map try

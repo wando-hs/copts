@@ -23,8 +23,8 @@ data OptionDetail = Details [Flag] (Maybe Parameter) String
     deriving (Show, Eq)
 
 
-description = someTill anyChar (lookAhead (try end) <|> parameter)
-    where parameter = void . lookAhead . string $ "[default: "
+description = someTill anyChar $ lookAhead (try end <|> parameter)
+    where parameter = void $ string "[default: "
 
 defaultValue = string "[default: "
     *> someTill anyChar (char ']' <* optional point)
