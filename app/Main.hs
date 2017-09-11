@@ -35,6 +35,8 @@ options ("graph":text:_) = print'
     $ plot . snd . graph . normalize
     <$> parse help "" text
 
+options ("mirror":text:params) = pPrint params
+
 options ("predict":text:params) = print'
     $ unwords . nub . map ha . predictions
     <$> parse help "" text

@@ -10,7 +10,7 @@ module Copts.Parser
     ) where
 
 
-import Text.Megaparsec (string, anyChar, manyTill, space, newline, try)
+import Text.Megaparsec -- (dbg, string, anyChar, manyTill, space, newline, try)
 import Text.Megaparsec.String
 import Control.Applicative ((*>), (<*), (<$>), (<*>), optional, pure, some, many)
 import Data.Maybe (Maybe(..))
@@ -29,8 +29,13 @@ data Help = Simple String [Usage] | Complex String [Usage] [OptionDetail]
 
 header text = space *> string text *> spaces
 
-body parser = space *> parser <:> many (try line)
-    where line = newline *> spaces *> parser
+body :: Parser a -> Parser [a]
+body parser = (space *> parser <* spaces) <:> some (try line)
+    where line = newline *> parser <* spaces
+
+body' :: Show a => Parser a -> Parser [a]
+body' parser = (space *> parser) <:> some (try line)
+    where line = newline *> spaces *> parser <* spaces
 
 description = manyTill anyChar (try $ header "Usage:")
 
@@ -40,4 +45,4 @@ from d u Nothing = Simple d u
 help = from
     <$> description
     <*> body usage
-    <*> optional ( try (header "Options:" *> body details) )
+    <*> optional (header "Options:" *> body details)

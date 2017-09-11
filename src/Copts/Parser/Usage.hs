@@ -58,7 +58,8 @@ optional = label "optional group"
 
 options = pure Options <* string "[options]"
 
-usage = command
+usage = spaces
+    *> command
     <:> (try shortcut <|> pure [])
     <++> many (any [exclusive, repeated, element, required, optional])
     where shortcut = pure <$> (spaces *> options <* spaces)

@@ -12,7 +12,7 @@ import Data.Functor (Functor, fmap)
 
 
 end :: Parser ()
-end = try (void eol) <|> void eof
+end = void eol <|> void eof
 
 ignore :: Char -> Parser ()
 ignore = void . try . char

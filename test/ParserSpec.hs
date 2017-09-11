@@ -16,8 +16,8 @@ navalFate = "Naval Fate.\n\
 \  naval_fate --version\n\
 \\n\
 \Options:\n\
-\  -h --help     Show this screen.\n\
-\  --version     Show version.\n\
+\  -h --help     Show this screen. \n\
+\  --version     Show version.  \n\
 \  --speed=<kn>  Speed in knots [default: 10].\n\
 \  --moored      Moored (anchored) mine.\n\
 \  --drifting    Drifting mine.\n\
@@ -25,8 +25,8 @@ navalFate = "Naval Fate.\n\
 \Examples:"
 
 spec =
-  describe "parsing a help text" $ do
-    it "when it is valid" $ do
+  describe "parsing a help text" $
+    it "when it is valid" $
       parse (help, navalFate) $
         Complex "Naval Fate."
           [
@@ -40,7 +40,7 @@ spec =
           [
             Details [Short 'h', Long "help"] Nothing "Show this screen.",
             Details [Long "version"] Nothing "Show version.",
-            Details [Long "speed"] (Just $ Parameter "kn" $ Just "10") "Speed in knots ",
+            Details [Long "speed"] (Just $ Parameter "kn" $ Just "10") "Speed in knots",
             Details [Long "moored"] Nothing "Moored (anchored) mine.",
             Details [Long "drifting"] Nothing "Drifting mine."
           ]

@@ -23,15 +23,15 @@ data OptionDetail = Details [Flag] (Maybe Parameter) String
     deriving (Show, Eq)
 
 
-description = someTill anyChar $ lookAhead (try end <|> parameter)
-    where parameter = void $ string "[default: "
+description = someTill anyChar (try eof <|> try parameter)
+    where parameter = try spaces <* lookAhead (string "[default: ")
+          eof = spaces *> lookAhead end
 
 defaultValue = string "[default: "
     *> someTill anyChar (char ']' <* optional point)
 
 parameter Nothing = pure Nothing
-parameter (Just name) = Just
-    <$> Parameter name
+parameter (Just name) = Just . Parameter name
     <$> optional (try defaultValue)
 
 validateNames names
@@ -48,6 +48,7 @@ synonymous = do
     either fail (\n -> pure (fs, n)) (validateNames ns)
 
 details = do
+    spaces
     (fs, name) <- synonymous
     desc <- string "  " *> spaces *> description
     p <- parameter name

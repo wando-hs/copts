@@ -21,18 +21,18 @@ data Element = Command String | Argument String | Option (Flag, Maybe String)
     deriving (Show, Eq)
 
 
-name = letterChar <:> (try $ many character)
+name = letterChar <:> try (many character)
     where character = try alphaNumChar <|> oneOf ['-', '_']
 
 argument' = between (char '<') (char '>') name
 
 parameter = label "parameter" $ try argument' <|> some upperChar
 
-shortOption = liftA2 (,) flag (optional $ param)
+shortOption = liftA2 (,) flag (optional param)
     where flag = Short <$ string "-" <*> letterChar
           param = try $ ignore ' ' *> parameter
 
-longOption = liftA2 (,) flag (optional $ param)
+longOption = liftA2 (,) flag (optional param)
     where flag = Long <$ string "--" <*> name
           param = try $ ignoreOneOf ['=', ' '] *> parameter
 
