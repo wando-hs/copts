@@ -8,16 +8,16 @@ import Prelude (String, mod, show, ($))
 import Copts.Graph
 
 
-print (Text l t) = show l ++ ") " ++ t
-print (Input l t) = show l ++ ") " ++ t
+print (Text l t) = show l ++ "-" ++ t
+print (Input l t) = show l ++ "-" ++ t
 
 color n = colors !! (mod n $ length colors)
     where colors = ["blue1", "cadetblue", "chocolate", "burlywood", "chartreuse",
                     "cornflowerblue", "brown", "cornsilk4", "cyan3", "red1",
                     "darkorange1", "darkorchid4", "indianred1"]
 
-vertexStyle (Text l _) = ["color" := color l]
-vertexStyle (Input l _) = ["style" := "dashed", "color" := color l]
+vertexStyle (Text l t) = ["color" := color l, "label" := t]
+vertexStyle (Input l t) = ["style" := "dashed", "color" := color l, "label" := t]
 
 edgeStyle _ (Text l _) = ["color" := color l]
 edgeStyle _ (Input l _) = ["color" := color l]
