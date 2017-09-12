@@ -4,7 +4,7 @@ module Copts.Parser.Combinators
 
 
 import Prelude (String, Char, last, init, foldr1, map, snd, fst, (.), ($), (++))
-import Text.Megaparsec (try, oneOf, char, eol, eof)
+import Text.Megaparsec (try, label, oneOf, char, eol, eof)
 import Control.Applicative (liftA2, optional, many, (<|>), (<*), pure)
 import Text.Megaparsec.String (Parser)
 import Control.Monad (void)
@@ -12,7 +12,8 @@ import Data.Functor (Functor, fmap)
 
 
 end :: Parser ()
-end = void eol <|> void eof
+end = label "end of line or file"  parser
+  where parser = void eol <|> void eof
 
 ignore :: Char -> Parser ()
 ignore = void . try . char

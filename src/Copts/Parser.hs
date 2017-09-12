@@ -30,12 +30,8 @@ data Help = Simple String [Usage] | Complex String [Usage] [OptionDetail]
 header text = space *> string text *> spaces
 
 body :: Parser a -> Parser [a]
-body parser = (space *> parser <* spaces) <:> some (try line)
-    where line = newline *> parser <* spaces
-
-body' :: Show a => Parser a -> Parser [a]
-body' parser = (space *> parser) <:> some (try line)
-    where line = newline *> spaces *> parser <* spaces
+body parser = (space *> parser) <:> many (try line)
+    where line = newline *> spaces *> parser
 
 description = manyTill anyChar (try $ header "Usage:")
 
