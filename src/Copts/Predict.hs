@@ -2,7 +2,7 @@ module Copts.Predict (predict, predictions) where
 
 import Algebra.Graph (Graph, edgeList, vertexList)
 import Data.Map.Strict (Map, (!), fromList)
-import Data.List (nub, find, filter, isPrefixOf)
+import Data.List (nub, null, find, filter, isPrefixOf)
 import Data.Char (isUpper)
 
 import Copts.Graph
@@ -26,13 +26,17 @@ partialMatch (Input _ _) _ = True
 predict' :: Vertex -> Map Vertex [Vertex] -> [String] -> [Vertex]
 predict' n m [] = [n]
 predict' n m [p]
-    | match n p = m ! n
     | partialMatch n p = [n]
+    | match n p = [n]
     | otherwise = []
 predict' n m (p:ps)
-    | match n p = concatMap (\n' -> predict' n' m ps) $ m ! n
+    | match n p = let paths = concatMap (\n' -> predict' n' m ps)
+                      texts = paths [t | t@Text{} <- m ! n]
+                      inputs = paths [i | i@Input{} <- m ! n]
+                  in if null texts then inputs else texts
     | otherwise = []
 
+completable :: Vertex -> Bool
 completable (Text _ _) = True
 completable (Input _ label) = all isUpper label
 
