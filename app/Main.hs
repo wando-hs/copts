@@ -16,17 +16,13 @@ import Copts.Predict
 import Text.Show.Pretty
 
 
-banana (Text _ _) = True
-banana (Input _ label) = all isUpper label
-
-ha (Text _ text) = text
-ha (Input _ label) = label
-
 print' (Right x) = putStrLn x
 print' (Left x) = hPutStrLn stderr $ ppShow x
 
 
 options :: [String] -> IO ()
+options ("mirror":text:params) = pPrint params
+
 options ("parse":text:_) = pPrint $ parse help "" text
 
 options ("normalize":text:_) = pPrint $ normalize <$> parse help "" text
@@ -35,12 +31,9 @@ options ("graph":text:_) = print'
     $ plot . snd . graph . normalize
     <$> parse help "" text
 
-options ("mirror":text:params) = pPrint params
-
 options ("predict":text:params) = print'
-    $ unwords . nub . map ha . predictions
+    $ unwords . predictions params . graph . normalize
     <$> parse help "" text
-    where predictions = filter banana . predict params . graph . normalize
 
 options x = putStr . unlines $
     [ "Bash complete tool for POSIX help texts."

@@ -29,8 +29,8 @@ data Help = Simple String [Usage] | Complex String [Usage] [OptionDetail]
 
 header text = space *> string text *> spaces
 
-body parser = (space *> parser) <:> many (try line)
-    where line = newline *> spaces *> parser
+body parser = (space *> parser <* spaces) <:> many (try line)
+    where line = newline *> spaces *> parser <* spaces
 
 description = manyTill anyChar (try $ header "Usage:")
 

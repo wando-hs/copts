@@ -1,6 +1,6 @@
-module Copts.Graph (Vertex(..), InterfaceGraph, graph) where
+module Copts.Graph (Vertex(..), Line, InterfaceGraph, label, line, graph) where
 
-import Text.Megaparsec
+import Text.Megaparsec hiding (label)
 import Text.Megaparsec.String
 import Algebra.Graph (connect, connects, overlay, overlays, empty, star, biclique)
 import qualified Algebra.Graph as Alga
@@ -30,10 +30,7 @@ data Vertex = Text Line String | Input Line String
 
 instance Ord Vertex where
     node1 <= node2 = content node1 <= content node2
-
-
-content (Text l t) = show l ++ t
-content (Input l t) = show l ++ t
+        where content n = show (line n) ++ label n
 
 trimap f g h (a, b, c) = (f a, g b, h c)
 
@@ -88,6 +85,15 @@ fromPattern l border (Optional u) = trimap id id (border ++) $ cartesian $ map (
 
 rootVertex :: [Usage] -> Vertex
 rootVertex = head . fst . fromPattern 0 [] . head . head
+
+
+label :: Vertex -> String
+label (Text _ t) = t
+label (Input _ t) = t
+
+line :: Vertex -> Line
+line (Text l _) = l
+line (Input l _) = l
 
 graph :: [Usage] -> InterfaceGraph
 graph us = (root, overlays $ zipWith build [1 ..] us)
