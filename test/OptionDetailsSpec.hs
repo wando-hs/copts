@@ -22,4 +22,3 @@ spec =
       "-o FILE --output=FILE  Description"                 #> Details [Short 'o', Long "output"] (Just $ Parameter "FILE" Nothing) "Description"
       "-i <file>, --input <file>  Description"             #> Details [Short 'i', Long "input"] (Just $ Parameter "file" Nothing) "Description"
       "--stdout  Use stdout."                              #> Details [Long "stdout"] Nothing "Use stdout."
-

@@ -11,8 +11,8 @@ import Control.Monad (void)
 import Data.Functor (Functor, fmap)
 import Data.Void (Void)
 
-type Parser = Parsec Void String
 
+type Parser = Parsec Void String
 
 end :: Parser ()
 end = label "end of line or file"  parser

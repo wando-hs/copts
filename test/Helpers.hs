@@ -3,7 +3,9 @@ module Helpers where
 
 import Test.Hspec
 import Test.Hspec.Megaparsec
+
 import qualified Text.Megaparsec as M
+
 import Data.Void
 import Data.Set (fromList)
 import Data.Bifunctor (first)

@@ -9,7 +9,7 @@ dependencies:
   - base
   - containers
   - megaparsec
-  - algebraic-graphs >= 0.0.5
+  - algebraic-graphs
 library:
   source-dirs: src
 executables:

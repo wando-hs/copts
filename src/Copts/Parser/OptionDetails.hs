@@ -3,7 +3,7 @@ module Copts.Parser.OptionDetails
     where
 
 
-import Text.Megaparsec.Char (noneOf, eol, char, letterChar, anyChar, string)
+import Text.Megaparsec.Char (noneOf, eol, char, anyChar, string)
 import Text.Megaparsec (try, eof, between, lookAhead, someTill)
 import Control.Applicative (pure, optional, many, some, (<|>), (*>), (<*>))
 import Data.Set (fromList, elemAt, size)

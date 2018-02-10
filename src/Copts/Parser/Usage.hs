@@ -26,6 +26,7 @@ data Pattern = Optional Usage
              deriving (Show, Eq)
 
 type Usage = [Pattern]
+type Parser = Parsec Void String
 
 type Parser = Parsec Void String
 
