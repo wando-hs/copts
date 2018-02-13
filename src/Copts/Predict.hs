@@ -40,9 +40,9 @@ completable :: Vertex -> Bool
 completable (Text _ _) = True
 completable (Input _ label) = all isUpper label
 
-predict :: [String] -> InterfaceGraph -> [Vertex]
+predict :: [String] -> Interface -> [Vertex]
 predict [] (root, _) = [root]
 predict params (root, g) = predict' root (reachability g) params
 
-predictions :: [String] -> InterfaceGraph -> [String]
+predictions :: [String] -> Interface -> [String]
 predictions params = nub . map label . filter completable . predict params

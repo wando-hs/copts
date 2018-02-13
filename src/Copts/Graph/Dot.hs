@@ -3,15 +3,17 @@ module Copts.Graph.Dot (plot) where
 import Algebra.Graph
 import Algebra.Graph.Export.Dot
 import Data.List (length, (!!), (++))
-import Prelude (String, mod, show, ($))
+import Prelude (String, mod, show, ($), fromIntegral)
 
 import Copts.Graph
+
 
 
 print (Text l t) = show l ++ "-" ++ t
 print (Input l t) = show l ++ "-" ++ t
 
-color n = colors !! (mod n $ length colors)
+color :: Line -> String
+color n = colors !! fromIntegral (mod n $ fromIntegral $ length colors)
     where colors = ["blue1", "cadetblue", "chocolate", "burlywood", "chartreuse",
                     "cornflowerblue", "brown", "cornsilk4", "cyan3", "red1",
                     "darkorange1", "darkorchid4", "indianred1"]

@@ -1,89 +1,21 @@
-module Copts.Graph (Vertex(..), Line, InterfaceGraph, label, line, graph) where
+module Copts.Graph (Vertex(..), Line, Interface, label, line, graph) where
 
-import Algebra.Graph (connect, connects, overlay, overlays, empty, star, biclique)
 import qualified Algebra.Graph as Alga
 
-import Prelude hiding (cycle, fst, snd)
+import qualified Data.Set as Set
 
-import Data.Foldable (foldr, foldl, concat, concatMap)
-import Data.Maybe (Maybe(..))
-import Data.List (delete, map, zipWith, (++), unzip3, unwords)
+import Data.Word (Word8)
 
-import Copts.Applicative
 import Copts.Normalizer
+import Copts.Graph.DelimitedGraph
 
 
-type InnerGraph = (Border, Graph, Border)
-type Border = [Vertex]
-
-type Graph = Alga.Graph Vertex
-type Line = Int
-
-
-type Root = Vertex
-type InterfaceGraph = (Root, Graph)
-
+type Line = Word8
 data Vertex = Text Line String | Input Line String
-    deriving (Show, Eq)
-
-instance Ord Vertex where
-    node1 <= node2 = content node1 <= content node2
-        where content n = show (line n) ++ label n
-
-trimap f g h (a, b, c) = (f a, g b, h c)
-
-fst (x,_,_) = x
-snd (_,x,_) = x
-trd (_,_,x) = x
+    deriving (Show, Ord, Eq)
 
 
-blackhole :: Border -> Vertex -> Graph
-blackhole border node = biclique border [node]
-
-singleton :: Border -> Vertex -> InnerGraph
-singleton border node = ([node], blackhole border node, [node])
-
-cycle :: InnerGraph -> InnerGraph
-cycle (h, a, t) = (h, overlay a (biclique h t), h ++ t)
-
-cartesian :: [InnerGraph] -> InnerGraph
-cartesian subgs = trimap concat (overlays . (g :)) concat $ unzip3 subgs
-    where g = overlays $ map (conn subgs) subgs
-          conn as a = biclique (trd a) . concatMap fst $ delete a as
-
-
-fromUsage :: Line -> Border -> Usage -> InnerGraph
-fromUsage l border [] = (border, empty, [])
-fromUsage l border (p:ps) = foldl conn (fromPattern l border p) ps
-    where conn (h, a, t) = trimap (const h) (overlay a) id . fromPattern l t
-
-fromParameter :: Line -> Border -> Maybe (String, Maybe String) -> InnerGraph
-fromParameter l b Nothing = ([], empty, [])
-fromParameter l b (Just (label, Nothing)) = singleton b $ Input l label
-fromParameter l b (Just (label, Just _)) = ([param], blackhole b param, param : b)
-    where param = Input l label
-
-fromPattern :: Line -> Border -> Pattern -> InnerGraph
-fromPattern l b (Argument label) = singleton b $ Input l label
-
-fromPattern l b (Command name) = singleton b $ Text l name
-
-fromPattern l border (Option fs p) = ([n], overlays gs, e)
-    where (w, param, e) = fromParameter l [n] p
-          n = Text l $ unwords fs
-          gs = [param, blackhole border n, star n w]
-
-fromPattern l border (Required u) = fromUsage l border u
-
-fromPattern l border (Repeated p) =  cycle $ fromPattern l border p
-
-fromPattern l border (Exclusive us) = trimap concat overlays concat $ unzip3 $ map (fromUsage l border) us
-
-fromPattern l border (Optional u) = trimap id id (border ++) $ cartesian $ map (fromPattern l border) u
-
-rootVertex :: [Usage] -> Vertex
-rootVertex = head . fst . fromPattern 0 [] . head . head
-
+type Interface = (Vertex, Graph Vertex)
 
 label :: Vertex -> String
 label (Text _ t) = t
@@ -93,7 +25,38 @@ line :: Vertex -> Line
 line (Text l _) = l
 line (Input l _) = l
 
-graph :: [Usage] -> InterfaceGraph
-graph us = (root, overlays $ zipWith build [1 ..] us)
-    where build l = snd . fromUsage l [root] . tail
-          root = rootVertex us
+usage :: Line -> DelimitedGraph Vertex -> Usage -> DelimitedGraph Vertex
+usage line root = usage' root
+    where usage' = foldl pattern'
+
+          pattern' g (Command l) = mandatory g $ singleton (Text line l)
+          pattern' g (Argument l) = mandatory g $ singleton (Input line l)
+          pattern' g (Option flags p) = param' (option' g flags) p
+          pattern' g (Exclusive u) = mandatory g $ oneOf $ map (usage' empty) u
+          pattern' g (Repeated p) = mandatory g $ cyclical $ pattern' empty p
+          pattern' g (Optional u) = optionaly g $ cartesian $ map (pattern' empty) u
+          pattern' g (Required u) = mandatory g $ usage' empty u
+
+          option' g = mandatory g . oneOf . map (singleton . Text line)
+
+          param' g Nothing = g
+          param' g (Just (l, Nothing)) = mandatory g $ singleton (Input line l)
+          param' g (Just (l, _)) = optionaly g $ singleton (Input line l)
+
+root :: Pattern -> DelimitedGraph Vertex
+root node = usage 0 empty [node]
+
+graph' :: Pattern -> [Usage] -> (Vertex, Alga.Graph Vertex)
+graph' root' usages = (r root', g usages)
+    where g = snd . oneOf . map (uncurry build) . withLines
+          r = head . Set.toList . fst . root
+
+          build line = usage line (root root')
+          withLines = zip [1 ..]
+
+          snd (a, b, c) = b
+          fst (a, b, c) = a
+
+
+graph :: [Usage] -> (Vertex, Alga.Graph Vertex)
+graph usages = graph' (head $ head usages) (map tail usages)

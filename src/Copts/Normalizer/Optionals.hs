@@ -1,5 +1,6 @@
 module Copts.Normalizer.Optionals (join, group) where
 
+
 import Copts.Normalizer.Usage
 
 
@@ -10,12 +11,12 @@ group pred (x:xs)
   | otherwise = [x] : group pred xs
 
 join' = map flatten . group isOption
-    where extract (Optional u) = u
+    where extract (Optional usage) = usage
 
           isOption (Optional _) = True
           isOption _ = False
 
-          flatten [p] = p
+          flatten [pattern'] = pattern'
           flatten patterns = Optional $ concatMap extract patterns
 
 
