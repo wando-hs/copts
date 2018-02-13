@@ -34,14 +34,14 @@ usage line root = usage' root
           pattern' g (Option flags p) = param' (option' g flags) p
           pattern' g (Exclusive u) = mandatory g $ oneOf $ map (usage' empty) u
           pattern' g (Repeated p) = mandatory g $ cyclical $ pattern' empty p
-          pattern' g (Optional u) = optionaly g $ cartesian $ map (pattern' empty) u
+          pattern' g (Optional u) = optionally g $ cartesian $ map (pattern' empty) u
           pattern' g (Required u) = mandatory g $ usage' empty u
 
           option' g = mandatory g . oneOf . map (singleton . Text line)
 
           param' g Nothing = g
           param' g (Just (l, Nothing)) = mandatory g $ singleton (Input line l)
-          param' g (Just (l, _)) = optionaly g $ singleton (Input line l)
+          param' g (Just (l, _)) = optionally g $ singleton (Input line l)
 
 root :: Pattern -> DelimitedGraph Vertex
 root node = usage 0 empty [node]

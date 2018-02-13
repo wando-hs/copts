@@ -18,14 +18,14 @@ spec = do
     it "connect two singleton graphs" $ do
       mandatory (singleton 1) (singleton 2) `shouldBe` (fromList [1], graph [1, 2] [(1,2)], fromList [2])
 
-    it "connect two graphs" $ do
+    it "connect two graphs" $
       mandatory (singleton 0) graph1 `shouldBe` (fromList [0], graph [0, 1, 2] [(1,2), (0,1)], fromList [2])
 
-    it "connect (optionaly) two singleton graphs" $ do
-      optionaly (singleton 1) (singleton 2) `shouldBe` (fromList [1], graph [1, 2] [(1,2)], fromList [1, 2])
+    it "connect (optionally) two singleton graphs" $ do
+      optionally (singleton 1) (singleton 2) `shouldBe` (fromList [1], graph [1, 2] [(1,2)], fromList [1, 2])
 
-    it "connect (optionaly) two graphs" $ do
-      optionaly (singleton 0) graph1 `shouldBe` (fromList [0], graph [0, 1, 2] [(0, 1), (1,2)], fromList [0, 2])
+    it "connect (optionally) two graphs" $ do
+      optionally (singleton 0) graph1 `shouldBe` (fromList [0], graph [0, 1, 2] [(0, 1), (1,2)], fromList [0, 2])
 
     it "create a loop in a singleton" $ do
       cyclical (singleton 1) `shouldBe` (fromList [1], graph [1] [(1,1)], fromList [1])

@@ -33,8 +33,8 @@ mandatory g@(inBorder, graph, outBorder) g'@(inBorder', graph', outBorder')
 oneOf :: (Ord a) => [DelimitedGraph a] -> DelimitedGraph a
 oneOf = trimap Set.unions Alga.overlays Set.unions . unzip3
 
-optionaly :: (Ord a) => DelimitedGraph a -> DelimitedGraph a -> DelimitedGraph a
-optionaly a b = optionalWay $ mandatory a b
+optionally :: (Ord a) => DelimitedGraph a -> DelimitedGraph a -> DelimitedGraph a
+optionally a b = optionalWay $ mandatory a b
     where optionalWay (inBorder, graph, outBorder) = (inBorder, graph, Set.union outBorder inBorder)
 
 cyclical :: (Ord a) => DelimitedGraph a -> DelimitedGraph a
