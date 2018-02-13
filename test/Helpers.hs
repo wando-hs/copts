@@ -1,6 +1,5 @@
 module Helpers where
 
-
 import Test.Hspec
 import Test.Hspec.Megaparsec
 
