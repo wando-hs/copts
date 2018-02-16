@@ -22,4 +22,11 @@ navalFate = "Naval Fate.\n\
 \\n\
 \  naval_fate ship new AAA BBB"
 
-myProgram = ""
+myProgram = "Usage:\n\
+\  my_program command --option <argument>\n\
+\  my_program [<optional-argument>]\n\
+\  my_program --another-option=<with-argument>\n\
+\  my_program (--either-that-option | <or-this-argument>)\n\
+\  my_program <repeating-argument> <repeating-argument>...\n\
+\  my_program [command --option <argument>] <q>\n\
+\  my_program [command] [--option] [<argument>] <q>"

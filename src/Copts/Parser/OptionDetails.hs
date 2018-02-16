@@ -3,9 +3,9 @@ module Copts.Parser.OptionDetails
     where
 
 
-import Text.Megaparsec.Char (noneOf, eol, char, anyChar, string)
+import Text.Megaparsec.Char (noneOf, eol, char, letterChar, anyChar, string)
 import Text.Megaparsec (try, eof, between, lookAhead, someTill)
-import Control.Applicative (pure, optional, many, some, (<|>), (*>), (<*>))
+import Control.Applicative (liftA2, pure, optional, many, some, (<|>), (*>), (<*>))
 import Data.Set (fromList, elemAt, size)
 import Data.Either (Either (..), either)
 import Data.Maybe (Maybe (..), isJust)
@@ -14,13 +14,13 @@ import Data.Functor ((<$>))
 
 import Copts.Applicative
 import Copts.Parser.Combinators
-import Copts.Parser.Element
+import qualified Copts.Parser.Element as Element
 
 
 data Parameter = Parameter String (Maybe String)
     deriving (Show, Eq)
 
-data OptionDetail = Details [Flag] (Maybe Parameter) String
+data OptionDetail = Details [Element.Flag] (Maybe Parameter) String
     deriving (Show, Eq)
 
 
@@ -40,6 +40,17 @@ validateNames names
     | size set == 1 = Right $ elemAt 0 set
     | otherwise     = Left "Ta de brincation"
     where set = fromList $ filter isJust names
+
+
+shortOption = liftA2 (,) flag (optional param)
+    where flag = Element.Short <$ string "-" <*> letterChar
+          param = try $ ignore ' ' *> Element.parameter
+
+longOption = liftA2 (,) flag (optional param)
+    where flag = Element.Long <$ string "--" <*> Element.name
+          param = try $ ignoreOneOf ['=', ' '] *> Element.parameter
+
+option' = try shortOption <|> longOption
 
 options = option' <:> (many . try $ separator *> option')
     where separator = try (char ',' *> spaces) <|> spaces

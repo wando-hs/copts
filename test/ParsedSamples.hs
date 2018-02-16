@@ -17,3 +17,45 @@ navalFate =
     , Details [Long "moored"] Nothing "Moored (anchored) mine."
     , Details [Long "drifting"] Nothing "Drifting mine."
     ]
+
+myProgram =
+  Simple
+    ""
+    [ [ A (Command "my_program")
+      , A (Command "command")
+      , A (Option ( Long "option" , Nothing ))
+      , A (Argument "argument")
+      ]
+    , [ A (Command "my_program")
+      , Optional [ A (Argument "optional-argument") ]
+      ]
+    , [ A (Command "my_program")
+      , A (Option ( Long "another-option" , Just "with-argument" ))
+      ]
+    , [ A (Command "my_program")
+      , Required
+          [ Exclusive
+              [ [ A (Option ( Long "either-that-option" , Nothing )) ]
+              , [ A (Argument "or-this-argument") ]
+              ]
+          ]
+      ]
+    , [ A (Command "my_program")
+      , A (Argument "repeating-argument")
+      , Repeated (A (Argument "repeating-argument"))
+      ]
+    , [ A (Command "my_program")
+      , Optional
+          [ A (Command "command")
+          , A (Option ( Long "option" , Nothing ))
+          , A (Argument "argument")
+          ]
+      , A (Argument "q")
+      ]
+    , [ A (Command "my_program")
+      , Optional [ A (Command "command") ]
+      , Optional [ A (Option ( Long "option" , Nothing )) ]
+      , Optional [ A (Argument "argument") ]
+      , A (Argument "q")
+      ]
+    ]

@@ -7,6 +7,9 @@ import qualified ParsedSamples
 
 import Copts.Normalizer
 
-spec =
+spec = do
   it "normalize naval_fate example" $
     normalize ParsedSamples.navalFate `shouldBe` NormalizedSamples.navalFate
+
+  it "normalize myProgram example" $
+    normalize ParsedSamples.myProgram `shouldBe` NormalizedSamples.myProgram

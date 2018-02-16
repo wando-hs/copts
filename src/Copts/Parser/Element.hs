@@ -1,5 +1,5 @@
 module Copts.Parser.Element
-    (Element (..), Flag (..), argument, command, option, option', element)
+    (Element (..), Flag (..), parameter, name, argument, command, option, element)
     where
 
 
@@ -34,11 +34,11 @@ shortOption = liftA2 (,) flag (optional param)
 
 longOption = liftA2 (,) flag (optional param)
     where flag = Long <$ string "--" <*> name
-          param = try $ ignoreOneOf ['=', ' '] *> parameter
-
-command' = try name <|> string "--" <|> string "-"
+          param = try $ ignore '=' *> parameter
 
 option' = try shortOption <|> longOption
+
+command' = try name <|> string "--" <|> string "-"
 
 
 argument = label "argument" $ Argument <$> argument'

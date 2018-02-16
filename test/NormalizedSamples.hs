@@ -44,3 +44,45 @@ navalFate =
   , [ Command "naval_fate" , Option [ "--version" ] Nothing ]
   ]
 
+myProgram =
+  [ [ Command "my_program"
+    , Command "command"
+    , Option [ "--option" ] Nothing
+    , Argument "argument"
+    ]
+  , [ Command "my_program"
+    , Optional [ Argument "optional-argument" ]
+    ]
+  , [ Command "my_program"
+    , Option
+        [ "--another-option" ] (Just ( "with-argument" , Nothing ))
+    ]
+  , [ Command "my_program"
+    , Required
+        [ Exclusive
+            [ [ Option [ "--either-that-option" ] Nothing ]
+            , [ Argument "or-this-argument" ]
+            ]
+        ]
+    ]
+  , [ Command "my_program"
+    , Argument "repeating-argument"
+    , Repeated (Argument "repeating-argument")
+    ]
+  , [ Command "my_program"
+    , Optional
+        [ Command "command"
+        , Option [ "--option" ] Nothing
+        , Argument "argument"
+        ]
+    , Argument "q"
+    ]
+  , [ Command "my_program"
+    , Optional
+        [ Command "command"
+        , Option [ "--option" ] Nothing
+        , Argument "argument"
+        ]
+    , Argument "q"
+    ]
+  ]

@@ -3,7 +3,6 @@ module Copts.Normalizer.Optionals (join, group) where
 
 import Copts.Normalizer.Usage
 
-
 group _ [] = []
 group _ [x] = [[x]]
 group pred (x:xs)
@@ -19,9 +18,17 @@ join' = map flatten . group isOption
           flatten [pattern'] = pattern'
           flatten patterns = Optional $ concatMap extract patterns
 
+bla option@(Option flags (Just (p, _))) argument@(Argument a) =
+  if p == a then (option, option) else (option, argument)
+bla a b = (a, b)
+
+haha = concat . map (uncurry bla) . pairs
+    where pairs list = zip list (tail list)
+          concat list = foldr ((:) . fst) [snd $ last list] list
+
 
 join :: [Usage] -> [Usage]
-join = map usage'
+join = map haha . map usage'
     where usage' = map pattern' . join'
 
           pattern' (Exclusive p) = Exclusive $ map usage' p
