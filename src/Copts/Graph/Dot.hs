@@ -21,8 +21,7 @@ color n = colors !! fromIntegral (mod n $ fromIntegral $ length colors)
 vertexStyle (Text l t) = ["color" := color l, "label" := t]
 vertexStyle (Input l t) = ["style" := "dashed", "color" := color l, "label" := t]
 
-edgeStyle _ (Text l _) = ["color" := color l]
-edgeStyle _ (Input l _) = ["color" := color l]
+edgeStyle _ _ = ["color" := "gray"]
 
 style = Style
     { graphName               = ""
