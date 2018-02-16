@@ -1,7 +1,7 @@
 module Copts.Normalizer.Optionals (join, group) where
 
 
-import Copts.Normalizer.Usage
+import Copts.AST
 
 group _ [] = []
 group _ [x] = [[x]]
@@ -18,7 +18,7 @@ join' = map flatten . group isOption
           flatten [pattern'] = pattern'
           flatten patterns = Optional $ concatMap extract patterns
 
-bla option@(Option flags (Just (p, _))) argument@(Argument a) =
+bla option@(Option flags (Just (Parameter p _))) argument@(Argument a) =
   if p == a then (option, option) else (option, argument)
 bla a b = (a, b)
 

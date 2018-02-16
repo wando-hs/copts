@@ -1,6 +1,6 @@
 module NormalizedSamples where
 
-import Copts.Normalizer
+import Copts.AST
 
 navalFate =
   [ [ Command "naval_fate"
@@ -14,7 +14,7 @@ navalFate =
     , Command "move"
     , Argument "x"
     , Argument "y"
-    , Optional [ Option [ "--speed" ] (Just ( "kn" , Just "10" )) ]
+      , Optional [ Option [ Long "speed" ] (Just $ Parameter "kn" ( Just "10" )) ]
     ]
   , [ Command "naval_fate"
     , Command "ship"
@@ -30,24 +30,24 @@ navalFate =
     , Argument "y"
     , Optional
         [ Exclusive
-            [ [ Option [ "--moored" ] Nothing ]
-            , [ Option [ "--drifting" ] Nothing ]
+            [ [ Option [ Long "moored" ] Nothing ]
+            , [ Option [ Long "drifting" ] Nothing ]
             ]
         ]
     ]
   , [ Command "naval_fate"
     , Exclusive
-        [ [ Option [ "-h" , "--help" ] Nothing ]
-        , [ Option [ "-h" , "--help" ] Nothing ]
+        [ [ Option [ Short 'h' , Long "help" ] Nothing ]
+        , [ Option [ Short 'h' , Long "help" ] Nothing ]
         ]
     ]
-  , [ Command "naval_fate" , Option [ "--version" ] Nothing ]
+    , [ Command "naval_fate" , Option [ Long "version" ] Nothing ]
   ]
 
 myProgram =
   [ [ Command "my_program"
     , Command "command"
-    , Option [ "--option" ] Nothing
+    , Option [ Long "option" ] Nothing
     , Argument "argument"
     ]
   , [ Command "my_program"
@@ -55,12 +55,12 @@ myProgram =
     ]
   , [ Command "my_program"
     , Option
-        [ "--another-option" ] (Just ( "with-argument" , Nothing ))
+        [ Long "another-option" ] (Just $ Parameter "with-argument" Nothing )
     ]
   , [ Command "my_program"
     , Required
         [ Exclusive
-            [ [ Option [ "--either-that-option" ] Nothing ]
+            [ [ Option [ Long "either-that-option" ] Nothing ]
             , [ Argument "or-this-argument" ]
             ]
         ]
@@ -72,7 +72,7 @@ myProgram =
   , [ Command "my_program"
     , Optional
         [ Command "command"
-        , Option [ "--option" ] Nothing
+        , Option [ Long "option" ] Nothing
         , Argument "argument"
         ]
     , Argument "q"
@@ -80,7 +80,7 @@ myProgram =
   , [ Command "my_program"
     , Optional
         [ Command "command"
-        , Option [ "--option" ] Nothing
+        , Option [ Long "option" ] Nothing
         , Argument "argument"
         ]
     , Argument "q"

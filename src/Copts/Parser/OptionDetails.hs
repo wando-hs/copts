@@ -15,10 +15,9 @@ import Data.Functor ((<$>))
 import Copts.Applicative
 import Copts.Parser.Combinators
 import qualified Copts.Parser.Element as Element
+import Copts.AST (Parameter(..))
 
 
-data Parameter = Parameter String (Maybe String)
-    deriving (Show, Eq)
 
 data OptionDetail = Details [Element.Flag] (Maybe Parameter) String
     deriving (Show, Eq)

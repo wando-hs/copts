@@ -12,10 +12,8 @@ import Data.Maybe (Maybe)
 
 import Copts.Applicative
 import Copts.Parser.Combinators
+import Copts.AST (Flag(..))
 
-
-data Flag = Long String | Short Char
-    deriving (Show, Eq)
 
 data Element = Command String | Argument String | Option (Flag, Maybe String)
     deriving (Show, Eq)

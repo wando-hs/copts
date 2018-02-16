@@ -1,16 +1,16 @@
-module Copts.Normalizer (Usage, Pattern (..), normalize) where
+module Copts.Normalizer (normalize) where
 
 
 import Copts.Normalizer.DetailedOptions (get, build, none, all)
 import qualified Copts.Normalizer.Optionals as Optionals
 import qualified Copts.Parser as P
-import Copts.Normalizer.Usage
+import Copts.AST
 
 import Data.List (map)
 import Prelude (($))
 
 
-simplify details = map usage'
+toAST details = map usage'
     where usage' = map pattern'
 
           pattern' (P.Exclusive p) = Exclusive $ map usage' p
@@ -24,5 +24,5 @@ simplify details = map usage'
 
 
 normalize :: P.Help -> [Usage]
-normalize (P.Simple _ us) = Optionals.join $ simplify none us
-normalize (P.Complex _ us opts) = Optionals.join $ simplify (build opts) us
+normalize (P.Simple _ us) = Optionals.join $ toAST none us
+normalize (P.Complex _ us opts) = Optionals.join $ toAST (build opts) us
