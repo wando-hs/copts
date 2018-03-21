@@ -10,6 +10,7 @@ import System.IO (stderr, hPutStrLn)
 import Copts.Graph
 import Copts.Graph.Dot
 import Copts.Normalizer
+import Copts.AST
 import Copts.Parser
 import Copts.Predict
 

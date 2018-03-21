@@ -3,16 +3,15 @@ module Copts.Parser.Combinators
   where
 
 
-import Prelude (String, Char, last, init, foldr1, map, snd, fst, (.), ($), (++))
-import Text.Megaparsec (Parsec, try, label, eof)
+import Prelude (String, Char, foldr1, map, snd, fst, (.), ($))
+import Text.Megaparsec (try, label, eof)
 import Control.Applicative (liftA2, optional, many, (<|>), (<*), pure)
 import Text.Megaparsec.Char (oneOf, char, eol)
 import Control.Monad (void)
 import Data.Functor (Functor, fmap)
-import Data.Void (Void)
 
+import Copts.Parser.Data
 
-type Parser = Parsec Void String
 
 end :: Parser ()
 end = label "end of line or file"  parser

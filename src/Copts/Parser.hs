@@ -1,6 +1,6 @@
 module Copts.Parser
     ( Help (..)
-    , Usage (..)
+    , Usage
     , Pattern (..)
     , OptionDetail (..)
     , Parameter (..)
@@ -12,11 +12,12 @@ module Copts.Parser
 
 import Text.Megaparsec (manyTill, try)
 import Text.Megaparsec.Char (string, anyChar, space, newline)
-import Control.Applicative ((*>), (<*), (<$>), (<*>), optional, pure, some, many)
+import Control.Applicative ((*>), (<*), (<$>), (<*>), optional, many)
 import Data.Maybe (Maybe(..))
-import Prelude (Show(..), Eq, String, null, map, unlines, (++), ($), (.))
+import Prelude (Show(..), Eq, String, ($))
 
 import Copts.Applicative
+import Copts.Parser.Data
 import Copts.Parser.Usage
 import Copts.Parser.Element
 import Copts.Parser.Combinators
@@ -35,9 +36,8 @@ body parser = (space *> parser <* spaces) <:> many (try line)
 description = manyTill anyChar (try $ header "Usage:")
 
 from d u (Just o) = Complex d u o
-from d u Nothing = Simple d u
+from d u Nothing  = Simple d u
 
-help = from
-    <$> description
-    <*> body usage
-    <*> optional (try $ header "Options:" *> body details)
+help :: Parser Help
+help = from <$> description <*> body usage <*> optional
+    (try $ header "Options:" *> body details)

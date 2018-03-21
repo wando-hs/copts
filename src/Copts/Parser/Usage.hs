@@ -1,18 +1,17 @@
 module Copts.Parser.Usage
-    (Pattern (..), Usage, usage, exclusive)
+    (Pattern (..), Usage, usage)
     where
 
 
-import Text.Megaparsec.Char (eol, char, string)
-import Text.Megaparsec (Parsec, between, try, some, many, label)
-import Prelude (Show, Eq, String, ($), (.), (++), concat, foldr1, map, init, last)
-import Control.Applicative ((<*>), (*>), (<*), (<|>), liftA2, pure)
-import Data.Functor ((<$>), (<$))
-import Data.Void
+import Text.Megaparsec (between, try, some, many, label)
+import Control.Applicative ((*>), (<*), (<|>), pure)
+import Text.Megaparsec.Char (char, string)
+import Prelude (Show, Eq, ($), (.), map)
+import Data.Functor ((<$>))
 
-import qualified Control.Applicative as A
 
 import Copts.Applicative
+import Copts.Parser.Data
 import Copts.Parser.Combinators
 import qualified Copts.Parser.Element as E
 
@@ -26,10 +25,6 @@ data Pattern = Optional Usage
              deriving (Show, Eq)
 
 type Usage = [Pattern]
-type Parser = Parsec Void String
-
-type Parser = Parsec Void String
-
 
 any = tryAll . map (spaces *>)
 
@@ -62,6 +57,7 @@ optional = label "optional group"
 
 options = pure Options <* string "[options]"
 
+usage :: Parser Usage
 usage = spaces
     *> command
     <:> (try shortcut <|> pure [])
