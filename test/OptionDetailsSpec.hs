@@ -23,6 +23,3 @@ spec =
       "-i <file>, --input <file>  Description"             #> Details [Short 'i', Long "input"] (Just $ Parameter "file" Nothing) "Description"
       "--stdout  Use stdout."                              #> Details [Long "stdout"] Nothing "Use stdout."
 
-    it "invalid options" $
-      failWith details "-a A --bb B  Teste" ["Ta de brincation"]
-
