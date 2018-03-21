@@ -1,17 +1,11 @@
 module Copts.AST where
 
-
 data Parameter = Parameter String (Maybe String)
     deriving (Show, Eq)
 
 
 data Flag = Short Char | Long String
-    deriving (Eq)
-
-instance Show Flag where
-    show (Short name) = ['-', name]
-    show (Long name) = "--" ++ name
-
+    deriving (Show, Eq)
 
 data Pattern = Command String
              | Argument String

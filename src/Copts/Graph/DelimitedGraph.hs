@@ -1,12 +1,12 @@
-module Copts.Graph.DelimitedGraph  where
+module Copts.Graph.DelimitedGraph
+    (DelimitedGraph, empty, singleton, mandatory, oneOf, optionally, cyclical, cartesian)
+        where
 
 import qualified Algebra.Graph as Alga
 import qualified Data.Set as Set
 import Data.Set (Set)
 
 type DelimitedGraph a = (Set a, Alga.Graph a, Set a)
-type Graph a = Alga.Graph a
-
 
 trimap f g h (a, b, c) = (f a, g b, h c)
 
@@ -18,7 +18,7 @@ isEmpty (inBorder, graph, outBorder) = Set.null inBorder
 empty :: DelimitedGraph a
 empty = (Set.empty, Alga.empty, Set.empty)
 
-singleton :: (Ord a) => a -> DelimitedGraph a
+singleton :: a -> DelimitedGraph a
 singleton node = (border, Alga.vertex node, border)
     where border = Set.singleton node
 
@@ -26,7 +26,7 @@ mandatory :: (Ord a) => DelimitedGraph a -> DelimitedGraph a -> DelimitedGraph a
 mandatory g@(inBorder, graph, outBorder) g'@(inBorder', graph', outBorder')
     | isEmpty g = g'
     | isEmpty g' = g
-    | otherwise = (inBorder, newGraph, outBorder')
+    | otherwise = (inBorder, Alga.simplify newGraph, outBorder')
     where connections = Alga.biclique (Set.toList outBorder) (Set.toList inBorder')
           newGraph = Alga.overlays [graph, graph', connections]
 
@@ -43,7 +43,9 @@ cyclical (inBorder, graph, outBorder) = (inBorder, newGraph, Set.union outBorder
           newGraph = Alga.overlays [graph, connections]
 
 cartesian :: (Ord a) => [DelimitedGraph a] -> DelimitedGraph a
-cartesian = oneOf . map (uncurry mandatory) . removeLoops . product
-    where product graphs = concatMap (\z -> map ((,) z) graphs) graphs
+cartesian [] = empty
+cartesian [graph] = graph
+cartesian graphs = oneOf $ map (uncurry mandatory) $ removeLoops product'
+    where product' = concatMap (\z -> map ((,) z) graphs) graphs
           removeLoops = filter $ uncurry (/=)
 

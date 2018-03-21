@@ -1,10 +1,8 @@
-module Main where
+module Main (main) where
 
 
 import Text.Megaparsec (parse)
 import System.Environment (getArgs)
-import Data.Char (isUpper)
-import Data.List (nub)
 import System.IO (stderr, hPutStrLn)
 
 import Copts.Graph
@@ -21,7 +19,7 @@ print' (Left x) = hPutStrLn stderr $ ppShow x
 
 
 options :: [String] -> IO ()
-options ("mirror":text:params) = pPrint params
+options ("mirror":_:params) = pPrint params
 
 options ("parse":text:_) = pPrint $ parse help "" text
 
@@ -35,11 +33,12 @@ options ("predict":text:params) = print'
     $ unwords . predictions params . graph . normalize
     <$> parse help "" text
 
-options x = putStr . unlines $
+options _ = putStr . unlines $
     [ "Bash complete tool for POSIX help texts."
     , "Usage:"
     , "  copts (parse | normalize | plot | predict) <help>"
     , "  copts -h | --help"
     ]
 
+main :: IO ()
 main = options =<< getArgs

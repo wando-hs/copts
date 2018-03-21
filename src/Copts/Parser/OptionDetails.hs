@@ -3,16 +3,17 @@ module Copts.Parser.OptionDetails
     where
 
 
-import Text.Megaparsec.Char (noneOf, eol, char, letterChar, anyChar, string)
-import Text.Megaparsec (try, eof, between, lookAhead, someTill)
-import Control.Applicative (liftA2, pure, optional, many, some, (<|>), (*>), (<*>))
+import Text.Megaparsec.Char (char, letterChar, anyChar, string)
+import Text.Megaparsec (try, lookAhead, someTill)
+import Control.Applicative (liftA2, pure, optional, many, (<|>), (*>), (<*>))
 import Data.Set (fromList, elemAt, size)
 import Data.Either (Either (..), either)
 import Data.Maybe (Maybe (..), isJust)
-import Control.Monad (void, fail)
+import Control.Monad (fail)
 import Data.Functor ((<$>))
 
 import Copts.Applicative
+import Copts.Parser.Data
 import Copts.Parser.Combinators
 import qualified Copts.Parser.Element as Element
 import Copts.AST (Parameter(..))
@@ -23,8 +24,8 @@ data OptionDetail = Details [Element.Flag] (Maybe Parameter) String
     deriving (Show, Eq)
 
 
-description = someTill anyChar (try eof <|> try parameter)
-    where parameter = try spaces <* lookAhead (string "[default: ")
+description = someTill anyChar (try eof <|> try param)
+    where param = try spaces <* lookAhead (string "[default: ")
           eof = spaces *> lookAhead end
 
 defaultValue = string "[default: "
@@ -51,13 +52,14 @@ longOption = liftA2 (,) flag (optional param)
 
 option' = try shortOption <|> longOption
 
-options = option' <:> (many . try $ separator *> option')
-    where separator = try (char ',' *> spaces) <|> spaces
+options = option' <:> (many . try $ separator' *> option')
+    where separator' = try (char ',' *> spaces) <|> spaces
 
 synonymous = do
     (fs, ns) <- internalize <*> options
     either fail (\n -> pure (fs, n)) (validateNames ns)
 
+details :: Parser OptionDetail
 details = do
     spaces
     (fs, name) <- synonymous

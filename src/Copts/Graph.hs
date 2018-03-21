@@ -1,4 +1,4 @@
-module Copts.Graph (Vertex(..), Line, Interface, label, line, graph) where
+module Copts.Graph (Vertex(..), Column, Interface, label, graph) where
 
 import qualified Algebra.Graph as Alga
 
@@ -10,57 +10,47 @@ import Copts.AST
 import Copts.Graph.DelimitedGraph
 
 
-type Line = Word8
-data Vertex = Text Line String | Input Line String
+type Column = Word8
+data Vertex = Text Column String | Input Column String
     deriving (Show, Ord, Eq)
 
 
-type Interface = (Vertex, Graph Vertex)
+type Interface = (Vertex, Alga.Graph Vertex)
+
+
+text (Short  t) = [ '-', t ]
+text (Long  t) = "--" ++  t
+
+patternToGraph root column = pattern' root
+    where usage' = foldr (flip pattern')
+
+          option' g = mandatory g . oneOf . map (singleton . Text column)
+
+          param' g Nothing = g
+          param' g (Just (Parameter l Nothing)) = mandatory g $ singleton (Input column l)
+          param' g (Just (Parameter l _)) = optionally g $ singleton (Input column l)
+
+          pattern' g (Command l) = mandatory g $ singleton (Text column l)
+          pattern' g (Argument l) = mandatory g $ singleton (Input column l)
+          pattern' g (Option flags p) = param' (option' g (map text flags)) p
+          pattern' g (Exclusive u) = mandatory g $ oneOf $ map (usage' empty) u
+          pattern' g (Repeated p) = mandatory g $ cyclical $ pattern' empty p
+          pattern' g (Optional u) = optionally g $ cartesian $ map (pattern' empty) u
+          pattern' g (Required u) = mandatory g $ usage' empty u
+
+usageToGraph = foldr convert empty . withColumns
+    where convert (column, pattern') g = patternToGraph g column pattern'
+          withColumns = reverse . zip [0..]
+
+
+graph :: [Usage] -> (Vertex, Alga.Graph Vertex)
+graph usages = (root usages, graph' usages)
+    where graph' = snd' . oneOf . map usageToGraph
+          root = head . Set.toList . fst' . usageToGraph . pure . head . head
+
+          snd' (_, b, _) = b
+          fst' (a, _, _) = a
 
 label :: Vertex -> String
 label (Text _ t) = t
 label (Input _ t) = t
-
-line :: Vertex -> Line
-line (Text l _) = l
-line (Input l _) = l
-
-pattern' :: Line -> DelimitedGraph Vertex -> Pattern -> DelimitedGraph Vertex
-pattern' column g (Command l) = mandatory g $ singleton (Text column l)
-pattern' column g (Argument l) = mandatory g $ singleton (Input column l)
-pattern' column g (Option flags p) = param' column (option' column g (map show flags)) p
-pattern' column g (Exclusive u) = mandatory g $ oneOf $ map (usage' column empty) u
-pattern' column g (Repeated p) = mandatory g $ cyclical $ pattern' column empty p
-pattern' column g (Optional u) = optionally g $ cartesian $ map (pattern' column empty) u
-pattern' column g (Required u) = mandatory g $ usage' column empty u
-
-
-option' column g = mandatory g . oneOf . map (singleton . Text column)
-
-param' column g Nothing = g
-param' column g (Just (Parameter l Nothing)) = mandatory g $ singleton (Input column l)
-param' column g (Just (Parameter l _)) = optionally g $ singleton (Input column l)
-
-usage' :: Line -> DelimitedGraph Vertex -> Usage -> DelimitedGraph Vertex
-usage' column g ps = foldl (\ a b -> pattern' column a b) g ps
-
-usage :: Line  -> Usage -> DelimitedGraph Vertex
-usage line u = foldl (\ g (i,p) -> pattern' i g p) empty $ zip [1..] u
-
-root :: Pattern -> DelimitedGraph Vertex
-root node = usage 0 [node]
-
-graph' :: Pattern -> [Usage] -> (Vertex, Alga.Graph Vertex)
-graph' root' usages = (r root', g usages)
-    where g = snd . oneOf . map (uncurry build) . withLines
-          r = head . Set.toList . fst . root
-
-          build line = usage line
-          withLines = zip [0 ..]
-
-          snd (a, b, c) = b
-          fst (a, b, c) = a
-
-
-graph :: [Usage] -> (Vertex, Alga.Graph Vertex)
-graph usages = graph' (head $ head usages) usages
