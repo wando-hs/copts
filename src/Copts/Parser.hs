@@ -10,8 +10,8 @@ module Copts.Parser
     ) where
 
 
-import Text.Megaparsec -- (dbg, string, anyChar, manyTill, space, newline, try)
-import Text.Megaparsec.String
+import Text.Megaparsec (manyTill, try)
+import Text.Megaparsec.Char (string, anyChar, space, newline)
 import Control.Applicative ((*>), (<*), (<$>), (<*>), optional, pure, some, many)
 import Data.Maybe (Maybe(..))
 import Prelude (Show(..), Eq, String, null, map, unlines, (++), ($), (.))

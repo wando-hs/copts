@@ -1,7 +1,5 @@
 module Copts.Graph (Vertex(..), Line, InterfaceGraph, label, line, graph) where
 
-import Text.Megaparsec hiding (label)
-import Text.Megaparsec.String
 import Algebra.Graph (connect, connects, overlay, overlays, empty, star, biclique)
 import qualified Algebra.Graph as Alga
 

@@ -3,11 +3,12 @@ module Copts.Parser.Usage
     where
 
 
-import Text.Megaparsec.String (Parser)
-import Text.Megaparsec (char, between, try, some, many, string, eol, label)
-import Prelude (Show, Eq, ($), (.), (++), concat, foldr1, map, init, last)
+import Text.Megaparsec.Char (eol, char, string)
+import Text.Megaparsec (Parsec, between, try, some, many, label)
+import Prelude (Show, Eq, String, ($), (.), (++), concat, foldr1, map, init, last)
 import Control.Applicative ((<*>), (*>), (<*), (<|>), liftA2, pure)
 import Data.Functor ((<$>), (<$))
+import Data.Void
 
 import qualified Control.Applicative as A
 
@@ -25,6 +26,8 @@ data Pattern = Optional Usage
              deriving (Show, Eq)
 
 type Usage = [Pattern]
+
+type Parser = Parsec Void String
 
 
 any = tryAll . map (spaces *>)

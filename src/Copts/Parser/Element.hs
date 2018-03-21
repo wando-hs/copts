@@ -3,8 +3,8 @@ module Copts.Parser.Element
     where
 
 
-import Text.Megaparsec (string, label, try, char, letterChar, upperChar, oneOf,
-                        between, alphaNumChar)
+import Text.Megaparsec.Char (string, oneOf, letterChar, char, upperChar, alphaNumChar)
+import Text.Megaparsec (label, try, between)
 import Control.Applicative (many, some, optional, liftA2, (<*>), (*>), (<|>))
 import Prelude (Show, Eq, String, Char, ($))
 import Data.Functor ((<$>), (<$))
