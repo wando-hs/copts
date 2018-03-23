@@ -5,6 +5,21 @@ author: Fernando Oliveira
 copyright: 2017 Wando-HS
 license: MIT
 github: wando-hs/copts
+
+default-extensions:
+  - OverloadedStrings
+  - EmptyCase
+  - FlexibleContexts
+  - FlexibleInstances
+  - InstanceSigs
+  - MultiParamTypeClasses
+  - LambdaCase
+  - MultiWayIf
+  - NamedFieldPuns
+  - TupleSections
+  - ScopedTypeVariables
+  - TypeApplications
+
 dependencies:
   - base
   - containers
@@ -14,6 +29,7 @@ library:
   source-dirs: src
   ghc-options:
     - -Wall
+    - -Werror
     - -Wcompat
     - -Wincomplete-record-updates
     - -Wincomplete-uni-patterns
@@ -30,6 +46,7 @@ executables:
     source-dirs: app
     ghc-options:
       - -Wall
+      - -Werror
       - -Wcompat
       - -Wincomplete-record-updates
       - -Wincomplete-uni-patterns
