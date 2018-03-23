@@ -7,7 +7,7 @@ install: clean
 	@stack install
 
 watch: clean
-	@stack build --test --fast --file-watch --exec '$(MAKE) plot'
+	@stack test --fast --haddock-deps --file-watch --exec '$(MAKE) plot'
 
 plot: .
 	@find samples/ -type f -name '*.png' -delete
