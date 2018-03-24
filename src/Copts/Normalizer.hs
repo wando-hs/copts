@@ -6,8 +6,9 @@ import qualified Copts.Normalizer.Optionals as Optionals
 import qualified Copts.Parser as P
 import Copts.AST
 
-import Data.List (map)
-import Prelude (($))
+import Data.List (head, map, tail)
+import Prelude (($), (.))
+
 
 toAST details = map usage'
     where usage' = map pattern'
@@ -21,7 +22,11 @@ toAST details = map usage'
           pattern' (P.A (P.Command name))    = Command name
           pattern' P.Options                 = Optional $ all details
 
+join usages = [root usages, exclusive usages]
+    where exclusive = Exclusive . map tail
+          root = head . head
 
-normalize :: P.Help -> [Usage]
-normalize (P.Simple _ us)       = Optionals.join $ toAST none us
-normalize (P.Complex _ us opts) = Optionals.join $ toAST (build opts) us
+
+normalize :: P.Help -> Usage
+normalize (P.Simple _ us)       = join $ Optionals.join $ toAST none us
+normalize (P.Complex _ us opts) = join $ Optionals.join $ toAST (build opts) us
