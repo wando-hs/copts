@@ -5,8 +5,6 @@ import Text.Megaparsec (parse)
 import System.Environment (getArgs)
 import System.IO (stderr, hPutStrLn)
 
-import Copts.Graph
-import Copts.Graph.Dot
 import Copts.Normalizer
 import Copts.Parser
 import Copts.Predict
@@ -25,12 +23,8 @@ options ("parse":text:_) = pPrint $ parse help "" text
 
 options ("normalize":text:_) = pPrint $ normalize <$> parse help "" text
 
-options ("graph":text:_) = print'
-    $ plot . snd . graph . normalize
-    <$> parse help "" text
-
 options ("predict":text:params) = print'
-    $ unwords . concatMap (flip predict params) . normalize
+    $ unwords . flip predict params . normalize
     <$> parse help "" text
 
 options _ = putStr . unlines $

@@ -22,10 +22,8 @@ default-extensions:
 
 dependencies:
   - base
-  - split
   - containers
   - megaparsec
-  - algebraic-graphs
 library:
   source-dirs: src
   ghc-options:
