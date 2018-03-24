@@ -30,7 +30,7 @@ options ("graph":text:_) = print'
     <$> parse help "" text
 
 options ("predict":text:params) = print'
-    $ unwords . predictions params . graph . normalize
+    $ unwords . concatMap (flip predict params) . normalize
     <$> parse help "" text
 
 options _ = putStr . unlines $
