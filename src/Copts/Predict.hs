@@ -1,48 +1,55 @@
-module Copts.Predict (predict, predictions) where
-
-import Algebra.Graph (Graph, edgeList, vertexList)
-import Data.Map.Strict (Map, (!), fromList)
-import Data.List (nub, null, filter, isPrefixOf)
-import Data.Char (isUpper)
-
-import Copts.Graph
+module Copts.Predict (predict) where
 
 
-reachability :: (Ord a) => Graph a -> Map a [a]
-reachability g = fromList $ map reachable vertices
-    where reachable n = (n, map snd $ filter ((n ==) . fst) edges)
-          vertices = vertexList g
-          edges = edgeList g
+import Copts.AST
 
+import Control.Monad ((>>=), join)
+import Data.Maybe (Maybe(..), catMaybes)
+import Data.Either (Either(..), lefts)
 
-match :: Vertex -> String -> Bool
-match (Text _ a) param = a == param
-match (Input _ _) _ = True
+import Data.Foldable (foldl, concatMap)
+import Data.Traversable (traverse)
+import Data.List ((++), isPrefixOf, map, nub)
+import Prelude (String, ($), (.), (==), flip, otherwise)
 
-partialMatch :: Vertex -> String -> Bool
-partialMatch (Text _ a) param = param `isPrefixOf` a && param /= a
-partialMatch (Input _ _) _ = True
+type Path = [String]
+type Completion = [String]
 
-predict' :: Vertex -> Map Vertex [Vertex] -> [String] -> [Vertex]
-predict' n _ [] = [n]
-predict' n _ [p]
-    | partialMatch n p = [n]
-    | match n p = [n]
-    | otherwise = []
-predict' n m (p:ps)
-    | match n p = let paths = concatMap (\n' -> predict' n' m ps)
-                      texts = paths [t | t@Text{} <- m ! n]
-                      inputs = paths [i | i@Input{} <- m ! n]
-                  in if null texts then inputs else texts
-    | otherwise = []
+match :: Path -> String -> Either (Maybe String) Path
+match []          current     = Left $ Just current
+match (text:path) current
+  | text == current           = Right path
+  | text `isPrefixOf` current = Left $ Just current
+  | otherwise                 = Left Nothing
 
-completable :: Vertex -> Bool
-completable (Text _ _) = True
-completable (Input _ name) = all isUpper name
+flagName (Short name) = '-' : [name]
+flagName (Long name)  = "--" ++ name
 
-predict :: [String] -> Interface -> [Vertex]
-predict [] (root, _) = [root]
-predict params (root, g) = predict' root (reachability g) params
+matchParam :: Path -> Maybe Parameter -> Either (Maybe String) Path
+matchParam []       _       = Left Nothing
+matchParam path     Nothing = Right path
+matchParam (_:path) _       = Right path
 
-predictions :: [String] -> Interface -> [String]
-predictions params = nub . map label . filter completable . predict params
+matchFlag :: Path -> Maybe Parameter -> Flag -> Either (Maybe String) Path
+matchFlag []   _     flag = Left $ Just $ flagName flag
+matchFlag path param flag = match path (flagName flag) >>= flip matchParam param
+
+matchPattern :: Path -> Pattern -> [Either (Maybe String) Path]
+matchPattern []       (Command name)       = [Left $ Just name]
+matchPattern path     (Command name)       = [match path name]
+matchPattern []       (Argument _)         = [Left Nothing]
+matchPattern (_:path) (Argument _)         = [Right path]
+matchPattern path     (Option flags param) = map (matchFlag path param) flags
+matchPattern path     (Repeated pattern')  = matchPattern path pattern'
+matchPattern path     (Required usage)     = matchUsage path usage
+matchPattern path     (Optional usage)     = matchUsage path usage
+matchPattern path     (Exclusive usages)   = concatMap (matchUsage path) usages
+
+matchUsage :: Path -> Usage -> [Either (Maybe String) Path]
+matchUsage _    []     = [Left Nothing]
+matchUsage path (u:us) = foldl continue (matchPattern path u) us
+    where continue paths pattern' = concatMap (findMatches pattern') paths
+          findMatches pattern'    = map join . traverse (flip matchPattern pattern')
+
+predict :: Usage -> Path -> Completion
+predict usage = nub . catMaybes . lefts . flip matchUsage usage

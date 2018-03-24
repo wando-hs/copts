@@ -1,11 +1,11 @@
 module Copts.AST where
 
 data Parameter = Parameter String (Maybe String)
-    deriving (Show, Eq)
+    deriving (Show, Eq, Ord)
 
 
 data Flag = Short Char | Long String
-    deriving (Show, Eq)
+    deriving (Show, Eq, Ord)
 
 data Pattern = Command String
              | Argument String
@@ -14,7 +14,7 @@ data Pattern = Command String
              | Required Usage
              | Exclusive [Usage]
              | Repeated Pattern
-             deriving (Show, Eq)
+             deriving (Show, Eq, Ord)
 
 
 type Usage = [Pattern]
