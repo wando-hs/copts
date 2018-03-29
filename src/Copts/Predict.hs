@@ -17,9 +17,11 @@ type Completion = [String]
 
 match :: Path -> String -> Either (Maybe String) Path
 match []          current     = Left $ Just current
+match [text]      current
+  | text `isPrefixOf` current = Left $ Just current
+  | otherwise                 = Left Nothing
 match (text:path) current
   | text == current           = Right path
-  | text `isPrefixOf` current = Left $ Just current
   | otherwise                 = Left Nothing
 
 flagName (Short name) = '-' : [name]
