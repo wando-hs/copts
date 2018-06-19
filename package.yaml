@@ -35,10 +35,7 @@ library:
     - -Wredundant-constraints
     - -fno-warn-missing-signatures
     - -Wmissing-exported-signatures
-    - -threaded
     - -O2
-    - -rtsopts
-    - -with-rtsopts=-N
 executables:
   copts:
     main: Main.hs
@@ -62,7 +59,9 @@ tests:
   copts-test:
     main: Spec.hs
     source-dirs: test
+    ghc-options:
+      - -fno-warn-missing-signatures
     dependencies:
-    - copts
-    - hspec
-    - hspec-megaparsec
+      - copts
+      - hspec
+      - hspec-megaparsec

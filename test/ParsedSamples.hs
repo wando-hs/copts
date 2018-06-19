@@ -2,6 +2,7 @@ module ParsedSamples where
 
 import Copts.Parser
 
+navalFate :: Help
 navalFate =
   Complex "Naval Fate."
     [ [A $ Command "naval_fate", A $ Command "ship", A $ Command "new", Repeated $ A $ Argument "name"]
@@ -18,6 +19,7 @@ navalFate =
     , Details [Long "drifting"] Nothing "Drifting mine."
     ]
 
+myProgram :: Help
 myProgram =
   Simple
     ""

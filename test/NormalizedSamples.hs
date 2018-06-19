@@ -2,6 +2,7 @@ module NormalizedSamples where
 
 import Copts.AST
 
+navalFate :: Usage
 navalFate =
   [ Command "naval_fate"
   , Exclusive
@@ -42,6 +43,7 @@ navalFate =
     ]
   ]
 
+myProgram :: Usage
 myProgram =
   [ Command "my_program"
   , Exclusive

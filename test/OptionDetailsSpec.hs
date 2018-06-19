@@ -6,12 +6,13 @@ import Test.Hspec
 import Copts.Parser.Element
 import Copts.Parser.OptionDetails
 
-
+(#>) :: String -> OptionDetail -> IO ()
 text #> result = do
   parse (details, text ++ "  ") result
   parse (details, "  " ++ text) result
   parse (details, text) result
 
+spec :: SpecWith ()
 spec =
   describe "parsing option details" $ do
     it "when it is valid" $ do
