@@ -5,7 +5,7 @@ navalFate = "Naval Fate.\n\
 \\n\
 \Usage:\n\
 \  naval_fate ship new <name>...\n\
-\  naval_fate ship <name> move <x> <y> [--speed=<kn>]\n\
+\  naval_fate ship <name> move <x> <y> [--speed <kn>]\n\
 \  naval_fate ship shoot <x> <y>\n\
 \  naval_fate mine (set|remove) <x> <y> [--moored|--drifting]\n\
 \  naval_fate -h | --help\n\
@@ -26,6 +26,7 @@ myProgram = "Usage:\n\
 \  my_program command --option <argument>\n\
 \  my_program [<optional-argument>]\n\
 \  my_program --another-option=<with-argument>\n\
+\  my_program --another-option2 <with-argument2>\n\
 \  my_program (--either-that-option | <or-this-argument>)\n\
 \  my_program <repeating-argument> <repeating-argument>...\n\
 \  my_program [command --option <argument>] <q>\n\

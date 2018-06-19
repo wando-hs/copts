@@ -55,6 +55,9 @@ myProgram =
     , [ Option
         [ Long "another-option" ] (Just $ Parameter "with-argument" Nothing )
       ]
+    , [ Option [ Long "another-option2" ] Nothing
+      , Argument "with-argument2"
+      ]
     , [ Required
         [ Exclusive $ Set.fromList
             [ [ Option [ Long "either-that-option" ] Nothing ]

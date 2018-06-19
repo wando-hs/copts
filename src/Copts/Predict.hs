@@ -40,6 +40,7 @@ matchPattern :: Path -> Pattern -> [Either (Maybe String) Path]
 matchPattern []       (Command name)       = [Left $ Just name]
 matchPattern path     (Command name)       = [match path name]
 matchPattern []       (Argument _)         = [Left Nothing]
+matchPattern [_]      (Argument _)         = [Left Nothing]
 matchPattern (_:path) (Argument _)         = [Right path]
 matchPattern path     (Option flags param) = map (matchFlag path param) flags
 matchPattern path     (Repeated pattern')  = matchPattern path pattern'
