@@ -2,7 +2,7 @@ module Copts.Normalizer (normalize) where
 
 
 import Copts.Normalizer.DetailedOptions (get, build, none, all)
-import qualified Copts.Normalizer.Optionals as Optionals
+import qualified Copts.Normalizer.Optimizations as Optimizations
 import qualified Copts.Parser as P
 import Copts.AST
 
@@ -29,5 +29,5 @@ join usages = [root usages, exclusive usages]
 
 
 normalize :: P.Help -> Usage
-normalize (P.Simple _ us)       = join $ Optionals.join $ toAST none us
-normalize (P.Complex _ us opts) = join $ Optionals.join $ toAST (build opts) us
+normalize (P.Simple _ us)       = join $ Optimizations.run $ toAST none us
+normalize (P.Complex _ us opts) = join $ Optimizations.run $ toAST (build opts) us
