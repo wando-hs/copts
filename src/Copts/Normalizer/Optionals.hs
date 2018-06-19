@@ -1,5 +1,6 @@
 module Copts.Normalizer.Optionals (join) where
 
+import qualified Data.Set as Set
 
 import Copts.AST
 
@@ -44,7 +45,7 @@ join :: [Usage] -> [Usage]
 join = map usage'
   where usage' = map pattern' . joinOptionals . resolveAmbiguousOptions
 
-        pattern' (Exclusive p) = Exclusive $ map usage' p
+        pattern' (Exclusive p) = Exclusive $ Set.map usage' p
         pattern' (Repeated p) = Repeated $ pattern' p
         pattern' (Optional u) = Optional $ usage' u
         pattern' (Required u) = Required $ usage' u

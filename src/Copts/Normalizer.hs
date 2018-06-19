@@ -7,13 +7,14 @@ import qualified Copts.Parser as P
 import Copts.AST
 
 import Data.List (head, map, tail)
+import qualified Data.Set as Set
 import Prelude (($), (.))
 
 
 toAST details = map usage'
     where usage' = map pattern'
 
-          pattern' (P.Exclusive p)           = Exclusive $ map usage' p
+          pattern' (P.Exclusive p)           = Exclusive $ Set.fromList $ map usage' p
           pattern' (P.Repeated p)            = Repeated $ pattern' p
           pattern' (P.Optional u)            = Optional $ usage' u
           pattern' (P.Required u)            = Required $ usage' u
@@ -23,7 +24,7 @@ toAST details = map usage'
           pattern' P.Options                 = Optional $ all details
 
 join usages = [root usages, exclusive usages]
-    where exclusive = Exclusive . map tail
+    where exclusive = Exclusive .Set.fromList . map tail
           root = head . head
 
 

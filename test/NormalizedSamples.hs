@@ -1,11 +1,12 @@
 module NormalizedSamples where
 
+import qualified Data.Set as Set
 import Copts.AST
 
 navalFate :: Usage
 navalFate =
   [ Command "naval_fate"
-  , Exclusive
+  , Exclusive $ Set.fromList
     [ [ Command "ship"
       , Command "new"
       , Repeated (Argument "name")
@@ -15,7 +16,8 @@ navalFate =
       , Command "move"
       , Argument "x"
       , Argument "y"
-        , Optional [ Option [ Long "speed" ] (Just $ Parameter "kn" ( Just "10" )) ]
+      , Optional
+        [ Option [ Long "speed" ] (Just $ Parameter "kn" ( Just "10" )) ]
       ]
     , [ Command "ship"
       , Command "shoot"
@@ -24,20 +26,18 @@ navalFate =
       ]
     , [ Command "mine"
       , Required
-          [ Exclusive [ [ Command "set" ] , [ Command "remove" ] ] ]
+        [ Exclusive $ Set.fromList
+          [ [ Command "set" ] , [ Command "remove" ] ] ]
       , Argument "x"
       , Argument "y"
       , Optional
-          [ Exclusive
-              [ [ Option [ Long "moored" ] Nothing ]
-              , [ Option [ Long "drifting" ] Nothing ]
-              ]
+          [ Exclusive $ Set.fromList
+            [ [ Option [ Long "moored" ] Nothing ]
+            , [ Option [ Long "drifting" ] Nothing ]
+            ]
           ]
       ]
-    , [ Exclusive
-          [ [ Option [ Short 'h' , Long "help" ] Nothing ]
-          , [ Option [ Short 'h' , Long "help" ] Nothing ]
-          ]
+    , [ Exclusive $ Set.singleton [ Option [ Short 'h' , Long "help" ] Nothing ]
       ]
     , [ Option [ Long "version" ] Nothing ]
     ]
@@ -46,7 +46,7 @@ navalFate =
 myProgram :: Usage
 myProgram =
   [ Command "my_program"
-  , Exclusive
+  , Exclusive $ Set.fromList
     [ [ Command "command"
       , Option [ Long "option" ] Nothing
       , Argument "argument"
@@ -56,7 +56,7 @@ myProgram =
         [ Long "another-option" ] (Just $ Parameter "with-argument" Nothing )
       ]
     , [ Required
-        [ Exclusive
+        [ Exclusive $ Set.fromList
             [ [ Option [ Long "either-that-option" ] Nothing ]
             , [ Argument "or-this-argument" ]
             ]
